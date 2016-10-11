@@ -14,7 +14,6 @@ local Entity = require 'entity'
 local Map = class('Map', Entity)
 
 function Map:initialize()
-  print('initialized map')
 end
 
 function Map:load()

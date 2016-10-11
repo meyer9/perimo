@@ -14,26 +14,44 @@ function Entity:initialize()
 end
 
 function Entity:load()
-  for objectId, subentity in ipairs(self.subentities) do
-    subentity:load()
-  end
 end
 
-function Entity:update(dt)
-  for objectId, subentity in ipairs(self.subentities) do
-    subentity:update(dt)
-  end
+function Entity:update()
 end
 
 function Entity:draw()
-  for objectId, subentity in ipairs(self.subentities) do
-    subentity:draw()
+end
+
+function Entity:call_load()
+  if self.subentities then
+    for objectId, subentity in ipairs(self.subentities) do
+      subentity:call_load()
+    end
   end
+  self:load()
+end
+
+function Entity:call_update(dt)
+  if self.subentities then
+    for objectId, subentity in ipairs(self.subentities) do
+      subentity:call_update(dt)
+    end
+  end
+  self:update(dt)
+end
+
+function Entity:call_draw()
+  if self.subentities then
+    for objectId, subentity in ipairs(self.subentities) do
+      subentity:call_draw()
+    end
+  end
+  self:draw()
 end
 
 function Entity:addSubentity(entity)
   entity.superentity = self
-  table.insert(self.subentities,entity)
+  table.insert(self.subentities, entity)
 end
 
 return Entity
