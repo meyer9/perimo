@@ -9,14 +9,14 @@ local class = require 'middleclass'
 
 -- Local Imports
 local Entity = require 'entity'
-local Map = require 'map'
+local GameMap = require 'gamemap'
 
 
 local Game = class('Game', Entity)
 
 function Game:initialize()
   Entity.initialize(self)
-  local map = Map:new()
+  local map = GameMap:new()
   self:addSubentity(map)
 end
 

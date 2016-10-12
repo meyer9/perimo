@@ -1,3 +1,9 @@
+------------------------------------------------------------------------------
+--	FILE:	  game.lua
+--	AUTHOR:   Julian Meyer
+--	PURPOSE:  Utility class for Perimo
+------------------------------------------------------------------------------
+
 Util = {}
 
 function Util.clone (t) -- deep-copy a table
