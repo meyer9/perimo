@@ -9,55 +9,59 @@ local class = require 'middleclass'
 
 -- Local Imports
 local Entity = require 'entity'
+local Animation = require 'animation'
 
 local Player = class('Player', Entity)
 
 function Player:load(controllable)
-  self.spritesheet_torso = love.graphics.newImage("player.png")
+  self.torsoAnimation = Animation:new('player_with_shotgun.png', 32, 32, 4, 0.3)
+  self.legAnimation = Animation:new('legs_anim.png', 32, 32, 9, 0.1)
   if not controllable then controllable = false end
-  self.controllable = controllable
   self.anim_index = 0
   self.x = 0
   self.y = 0
   self.speed = 100
-  self.anim_time = 0
-end
-
-function Player:incr_anim()
-  if self.anim_time > 0.3 then
-    self.anim_index = (self.anim_index + 1) % 3
-    self.anim_time = 0
-  end
+  self.dx = 0 -- how much moved in frame
+  self.dy = 0
+  self.legSmooth = 0
 end
 
 function Player:update(dt)
-  self.anim_time = self.anim_time + dt
-  -- self.x = 100
+  self.dx = 0
+  self.dy = 0
   if love.keyboard.isDown("w") then
-    self.y = self.y - (self.speed * dt)
-    self:incr_anim()
+    self.dy = -self.speed * dt
   elseif love.keyboard.isDown("s") then
-    self.y = self.y + (self.speed * dt)
-    self:incr_anim()
+    self.dy = self.speed * dt
   end
   if love.keyboard.isDown("a") then
-    self.x = self.x - (self.speed * dt)
-    self:incr_anim()
+    self.dx = -self.speed * dt
   elseif love.keyboard.isDown("d") then
-    self.x = self.x + (self.speed * dt)
-    self:incr_anim()
+    self.dx = self.speed * dt
   end
+
+  self.y = self.y + self.dy
+  self.x = self.x + self.dx
+
   if love.keyboard.isDown("w") or love.keyboard.isDown("a") or love.keyboard.isDown("s") or love.keyboard.isDown("d") then
-    self:incr_anim()
+    self.torsoAnimation:update(dt)
+    self.legAnimation:update(dt)
   else
-    self.anim_index = 1
+    self.torsoAnimation:resetAnimation(1)
+    self.legAnimation:resetAnimation()
   end
 end
 
 function Player:draw()
   -- draw torso
-  local rot = math.atan2(self.y - love.mouse.getY() / 2, self.x - love.mouse.getX() / 2) + math.pi
-  love.graphics.draw(self.spritesheet_torso, love.graphics.newQuad(self.anim_index * 32, 0, 32, 32, 128, 32), self.x, self.y, rot, 1, 1, 11, 13)
+  local rot = math.atan2(self.y - love.mouse.getY() / 3, self.x - love.mouse.getX() / 3) + math.pi
+
+  local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
+
+  love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 0.9, 0.9, 16, 16)
+  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 1, 1, 11, 13)
+
+  self.legSmooth = legRot
 end
 
 return Player

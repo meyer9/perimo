@@ -67,7 +67,7 @@ function GameMap:draw()
     self.dirty = false
   end
   b = os.clock()
-  love.graphics.scale(2,2)
+  love.graphics.scale(3,3)
   love.graphics.draw(self.cached_map)
 end
 
