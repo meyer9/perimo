@@ -18,8 +18,8 @@ local Map = class('Map', Entity)
 
 function Map:initialize(width, height)
   -- generate initial map data
-  if not width then self.width = 5 else self.width = width end
-  if not height then self.height = 5 else self.height = height end
+  if not width then self.width = 500 else self.width = width end
+  if not height then self.height = 500 else self.height = height end
   self.map_data = {}
   for i = 1, self.width do
     self.map_data[i] = {}
@@ -39,6 +39,7 @@ end
 
 function Map:set_tile(x, y, tile)
   self.map_data[x][y] = tile
+  self:changed()
 end
 
 function Map:generate_island()
@@ -91,6 +92,7 @@ function Map:generate_island()
       end
     end
     self.map_data = new_map
+    self:changed()
     new_map = nil
   end
 end
@@ -107,6 +109,10 @@ function Map:serialize()
   return serialized_map
 end
 
+function Map:changed()
+  -- hook for map changes
+end
+
 function Map:deserialize(serialized)
   local first = string.find(serialized, ';')
   local second = string.find(serialized, ';', first + 1)
@@ -119,7 +125,6 @@ function Map:deserialize(serialized)
   local map_data = serialized:sub(second + 1)
   for i = 0, (#map_data / 3) - 1 do
     local c = map_data:sub(i * 3 + 1,i * 3 + 3)
-    print(x, y)
     new_map[x][y] = tonumber(c)
     y = y + 1
     if (i + 1) % height == 0 then
@@ -129,6 +134,7 @@ function Map:deserialize(serialized)
     end
   end
   self.map_data = new_map
+  self:changed()
 end
 
 

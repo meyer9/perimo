@@ -19,14 +19,15 @@ function Game:initialize()
   Entity.initialize(self)
   love.graphics.setDefaultFilter('nearest', 'nearest')
 
-  local map = GameMap:new()
-  self:addSubentity(map)
+  self.map = GameMap:new()
+  self:addSubentity(self.map)
 
   self.multiplayer = Multiplayer:new()
-  self.multiplayer:connect()
+  self:addSubentity(self.multiplayer)
 end
 
 function Game:load()
+  self.multiplayer:connect()
 end
 
 function Game:update(dt)

@@ -20,7 +20,6 @@ function GameMap:load()
   self.spritesheet = love.graphics.newImage("spritesheet.png")
   local spritesheet_width, spritesheet_height = self.spritesheet:getDimensions()
   Tiles.generate_tiles(spritesheet_width, spritesheet_height)
-  self:generate_map()
 
   -- create cached canvas
   self.cached_map = love.graphics.newCanvas(self.width * 16, self.height * 16)
@@ -42,6 +41,10 @@ function GameMap:generate_map()
   end
 end
 
+function GameMap:changed()
+  self.dirty = true
+end
+
 function GameMap:update(dt)
 end
 
@@ -49,7 +52,6 @@ function GameMap:render_map()
   love.graphics.setCanvas(self.cached_map) -- draw on the canvas
     for x = 1, self.width do
       for y = 1, self.height do
-        print(self:get_tile(x, y))
         tile_to_draw = Tiles.Data[self:get_tile(x, y)]
         if tile_to_draw.should_draw ~= false then
           love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
@@ -65,8 +67,8 @@ function GameMap:draw()
     self.dirty = false
   end
   b = os.clock()
-  love.graphics.draw(self.cached_map)
   love.graphics.scale(2,2)
+  love.graphics.draw(self.cached_map)
 end
 
 return GameMap
