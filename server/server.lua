@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---	FILE:	  game.lua
+--	FILE:	  server.lua
 --	AUTHOR:   Julian Meyer
 --	PURPOSE:  Base server class for perimo
 ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ function Server:initialize()
 
   self.running = true
 
-  self.map = Map:new(100, 100)
+  self.map = Map:new(50, 50)
 
   print("Generating map...")
   self.map:generate_island()

@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---	FILE:	  main.lua
+--	FILE:	  multiplayer_handler.lua
 --	AUTHOR:   Julian Meyer
 --	PURPOSE:  Multiplayer handler for Perimo
 ------------------------------------------------------------------------------
@@ -82,6 +82,8 @@ function Multiplayer:handle_message(message)
   if cmd == 'map' then
     print("Loaded map...")
     self.superentity.map:deserialize(parms)
+  end
+  if cmd == 'playerJoin' then
   end
 end
 

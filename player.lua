@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---	FILE:	  map.lua
+--	FILE:	  player.lua
 --	AUTHOR:   Julian Meyer
 --	PURPOSE:  Player entity for Perimo
 ------------------------------------------------------------------------------
@@ -54,7 +54,8 @@ end
 
 function Player:draw()
   -- draw torso
-  local rot = math.atan2(self.y - love.mouse.getY() / 3, self.x - love.mouse.getX() / 3) + math.pi
+  local mousePositionX, mousePositionY = self.superentity.camera:mousePosition()
+  local rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
 
   local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
 

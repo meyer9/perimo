@@ -133,6 +133,8 @@ function Map:deserialize(serialized)
       y = 1
     end
   end
+  self.width = width
+  self.height = height
   self.map_data = new_map
   self:changed()
 end
