@@ -43,7 +43,7 @@ function Map:set_tile(x, y, tile)
 end
 
 function Map:generate_island()
-  cycles = 3
+  cycles = 10
   center_weight = 10
   math.randomseed(os.time() - os.clock() * 1000)
 

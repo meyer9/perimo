@@ -25,13 +25,88 @@ Tiles.Data = {
     width = 16,
     height = 16,
     x = 85,
-    y = 0
+    y = 0,
+    random = {
+      [1] = {
+        x = 85,
+        y = 17
+      }
+    }
   },
   [3] = {
     width = 16,
     height = 16,
     x = 0,
-    y = 0
+    y = 0,
+    edges = {
+      [2] = {
+        tl = {
+          x = 34,
+          y = 0
+        },
+        t = {
+          x = 51,
+          y = 0
+        },
+        tr = {
+          x = 68,
+          y = 0
+        },
+        r = {
+          x = 68,
+          y = 17
+        },
+        br = {
+          x = 68,
+          y = 34
+        },
+        b = {
+          x = 51,
+          y = 34
+        },
+        bl = {
+          x = 34,
+          y = 34
+        },
+        l = {
+          x = 34,
+          y = 17
+        },
+        dbl = {
+          x = 17,
+          y = 17
+        },
+        dbr = {
+          x = 0,
+          y = 17
+        },
+        dtl = {
+          x = 17,
+          y = 34
+        },
+        dtr = {
+          x = 0,
+          y = 34
+        },
+        tbl = {
+          x = 119,
+          y = 0
+        },
+        tbr = {
+          x = 102,
+          y = 17
+        },
+        n = {
+          x = 0,
+          y = 34
+        },
+        z = {
+          x = 0,
+          y = 34
+        }
+
+      }
+    }
   }
 }
 -- AND HERE
@@ -42,9 +117,20 @@ function Tiles.generate_tiles(sw, sh)
   for i, tile in pairs(Tiles.Data) do
     if type(tile) ~= 'function' and tile.should_draw ~= false then
       Tiles.Data[i].quad = love.graphics.newQuad(tile.x, tile.y, tile.width, tile.height, sw, sh)
+      if tile.edges then
+        for n, edge_tile in pairs(tile.edges) do
+          for z, edge_tile_permutation in pairs(edge_tile) do
+            Tiles.Data[i].edges[n][z].quad = love.graphics.newQuad(edge_tile_permutation.x, edge_tile_permutation.y, tile.width, tile.height, sw, sh)
+          end
+        end
+      end
+      if tile.random then
+        for n, random_tile in pairs(tile.random) do
+          Tiles.Data[i].random[n].quad = love.graphics.newQuad(random_tile.x, random_tile.y, tile.width, tile.height, sw, sh)
+        end
+      end
     end
   end
-  return tiles
 end
 
 function Tiles.tile(id)

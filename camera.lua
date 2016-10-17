@@ -113,10 +113,10 @@ function camera:attach(x,y,w,h, noclip)
 
 	local cx,cy = x+w/2, y+h/2
 	love.graphics.push()
-	love.graphics.translate(cx, cy)
+	love.graphics.translate(math.ceil(cx), math.ceil(cy))
 	love.graphics.scale(self.scale)
 	love.graphics.rotate(self.rot)
-	love.graphics.translate(-self.x, -self.y)
+	love.graphics.translate(-math.ceil(self.x), -math.ceil(self.y))
 end
 
 function camera:detach()

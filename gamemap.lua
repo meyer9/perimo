@@ -28,16 +28,6 @@ function GameMap:load()
   self.hasnttriggered = true
 end
 
-function GameMap:generate_map()
-  for x = 1, self.width do
-    for y = 1, self.height do
-      tile = Tiles.ID.GRASS
-      if math.random() > 0.5 then tile = Tiles.ID.WATER end
-      self:set_tile(x, y, tile)
-    end
-  end
-end
-
 function GameMap:changed()
   self.dirty = true
 end
@@ -55,7 +45,64 @@ function GameMap:draw()
     for y = visible_tile_y, visible_tile_y + visible_tile_height do
       tile_to_draw = Tiles.Data[self:get_tile(x, y)]
       if tile_to_draw.should_draw ~= false then
-        love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
+        adjCode = ""
+        if not tile_to_draw.edges then
+          if tile_to_draw.random then
+            math.randomseed(x + 100 * y)
+            randNum = math.floor(math.random() * (1 + #tile_to_draw.random))
+            if randNum == 0 then
+              love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
+            else
+              love.graphics.draw(self.spritesheet, tile_to_draw.random[randNum].quad, (x - 1) * 16, (y - 1) * 16)
+            end
+          else
+            love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
+          end
+        else
+          edges = tile_to_draw.edges
+          adjCode = ""
+          tile = nil
+          if edges[self:get_tile(x, y - 1)] then
+            adjCode = adjCode .. 't'
+            tile = self:get_tile(x, y - 1)
+          end
+          if edges[self:get_tile(x, y + 1)] and (tile == nil or tile == self:get_tile(x, y + 1)) then
+            adjCode = adjCode .. 'b'
+            tile = self:get_tile(x, y + 1)
+          end
+          if edges[self:get_tile(x - 1, y)] and (tile == nil or tile == self:get_tile(x - 1, y)) then
+            adjCode = adjCode .. 'l'
+            tile = self:get_tile(x - 1, y)
+          end
+          if edges[self:get_tile(x + 1, y)] and (tile == nil or tile == self:get_tile(x + 1, y)) then
+            adjCode = adjCode .. 'r'
+            tile = self:get_tile(x + 1, y)
+          end
+          if edges[self:get_tile(x - 1, y - 1)] and #adjCode == 0 then
+            adjCode = 'dtl'
+            tile = self:get_tile(x - 1, y - 1)
+          end
+          if edges[self:get_tile(x + 1, y - 1)] and #adjCode == 0 then
+            adjCode = 'dtr'
+            tile = self:get_tile(x + 1, y - 1)
+          end
+          if edges[self:get_tile(x - 1, y + 1)] and #adjCode == 0 then
+            adjCode = 'dbl'
+            tile = self:get_tile(x - 1, y + 1)
+          end
+          if edges[self:get_tile(x + 1, y + 1)] and #adjCode == 0 then
+            adjCode = 'dbr'
+            tile = self:get_tile(x + 1, y + 1)
+          end
+          if tile and adjCode and tile_to_draw.edges[tile][adjCode] then
+            love.graphics.draw(self.spritesheet, tile_to_draw.edges[tile][adjCode].quad, (x - 1) * 16, (y - 1) * 16)
+          else
+            if #adjCode > 0 then
+              print(adjCode)
+            end
+            love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
+          end
+        end
       end
     end
   end

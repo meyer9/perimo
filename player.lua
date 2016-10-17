@@ -14,7 +14,7 @@ local Animation = require 'animation'
 local Player = class('Player', Entity)
 
 function Player:load(controllable)
-  self.torsoAnimation = Animation:new('player_with_shotgun.png', 32, 32, 4, 0.3)
+  self.torsoAnimation = Animation:new('player.png', 32, 32, 4, 0.3)
   self.legAnimation = Animation:new('legs_anim.png', 32, 32, 9, 0.1)
   if not controllable then controllable = false end
   self.anim_index = 0
@@ -60,7 +60,7 @@ function Player:draw()
   local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
 
   love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 0.9, 0.9, 16, 16)
-  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 1, 1, 11, 13)
+  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 1, 1, 16, 16)
 
   self.legSmooth = legRot
 end
