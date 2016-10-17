@@ -46,15 +46,16 @@ function Map:generate_island()
   cycles = 10
   center_weight = 10
   math.randomseed(os.time() - os.clock() * 1000)
-
+  amount = (self.width + self.height) / 2 / 5
   for x = 1, self.width do
     for y = 1, self.height do
       tile = Tiles.ID.GRASS
-      if math.random() > 0.5 then tile = Tiles.ID.WATER end
+      if math.random() * math.sqrt((x - (self.width / 2)) ^ 2 + (y - (self.height / 2)) ^ 2) > amount then tile = Tiles.ID.WATER end
       self:set_tile(x, y, tile)
     end
   end
   for x = 1, cycles do
+    print("Pass " .. x .. " / " .. cycles)
     new_map = {}
     for x = 1, self.width do
       new_map[x] = {}

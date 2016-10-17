@@ -31,8 +31,10 @@ function Multiplayer:send(...)
   for i = 0, numPieces - 1 do
     if i == numPieces - 1 then
       self.sock:send(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, #message))
+      print("Sending " + ((i+1) / numPieces * 100) + "%...")
     else
       self.sock:send(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, (i + 1) * length))
+      print("Sending " + ((i+1) / numPieces * 100) + "%...")
     end
   end
 end
@@ -55,6 +57,7 @@ function Multiplayer:update(dt)
       local i = tonumber(i)
       local numParts = tonumber(numParts)
       if numParts ~= 1 then
+        print("Receiving " .. math.ceil(i / numParts * 100) .. "%...")
         if numParts == i then
           self:handle_message(self.message_pieces[id] .. message)
         end
