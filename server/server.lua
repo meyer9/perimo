@@ -38,7 +38,7 @@ function Server:initialize()
 
   self.running = true
 
-  self.map = Map:new(1000, 1000)
+  self.map = Map:new(200, 200)
 
   print("Generating map...")
   self.map:generate_island()
@@ -47,6 +47,10 @@ function Server:initialize()
   self.message_pieces = {}
 end
 
+--- sends a message to a client at ip:port
+-- @param message the message to send
+-- @param ip the ip to send the message to
+-- @param port the port to send the message to
 function Server:send(message, ip, port)
   print('sending message of length ' .. #message)
   local numPieces = math.ceil(#message / 7000)
@@ -59,10 +63,10 @@ function Server:send(message, ip, port)
   end
   for i = 0, numPieces - 1 do
     if i == numPieces - 1 then
-      print("Sending " + ((i+1) / numPieces * 100) + "%...")
+      -- print("Sending " + ((i+1) / numPieces * 100) + "%...")
       self.udp:sendto(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, #message), ip, port)
     else
-      print("Sending " + ((i+1) / numPieces * 100) + "%...")
+      -- print("Sending " + ((i+1) / numPieces * 100) + "%...")
       self.udp:sendto(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, (i + 1) * length), ip, port)
     end
   end

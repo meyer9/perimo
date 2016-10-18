@@ -20,6 +20,7 @@ local Game = class('Game', Entity)
 function Game:initialize()
   Entity.initialize(self)
   love.graphics.setDefaultFilter('nearest', 'nearest')
+  love.window.setMode(1280, 800, {msaa = 16, fullscreen = true})
 
   self.map = GameMap:new()
   self:addSubentity(self.map)

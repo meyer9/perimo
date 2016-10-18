@@ -10,12 +10,14 @@ local class = require 'middleclass'
 -- Local Imports
 local Entity = require 'entity'
 local Animation = require 'animation'
+local Bullet = require 'bullet'
 
 local Player = class('Player', Entity)
 
 function Player:load(controllable)
   self.torsoAnimation = Animation:new('player.png', 32, 32, 4, 0.3)
   self.legAnimation = Animation:new('legs_anim.png', 32, 32, 9, 0.1)
+  
   if not controllable then controllable = false end
   self.anim_index = 0
   self.x = 0
@@ -24,6 +26,8 @@ function Player:load(controllable)
   self.dx = 0 -- how much moved in frame
   self.dy = 0
   self.legSmooth = 0
+  self.reload = 100
+  self.toReload = self.reload
 end
 
 function Player:update(dt)
@@ -49,6 +53,15 @@ function Player:update(dt)
   else
     self.torsoAnimation:resetAnimation(1)
     self.legAnimation:resetAnimation()
+  end
+  self.toReload = self.toReload - 1
+  if love.mouse.isDown(1) and self.toReload < 0 then
+    self.toReload = self.reload
+    local mousePositionX, mousePositionY = self.superentity.camera:mousePosition()
+    local bullet = Bullet:new(self.x, self.y)
+    print(bullet)
+    self:addSubentity(bullet)
+    bullet:shoot(mousePositionX - self.x, mousePositionY - self.y)
   end
 end
 

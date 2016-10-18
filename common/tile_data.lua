@@ -12,7 +12,9 @@ local Tiles = {}
 Tiles.ID = {
   EMPTY = 1,
   GRASS = 2,
-  WATER = 3
+  WATER = 3,
+  TREE = 4,
+  FOLIAGE = 5
 }
 
 Tiles.Data = {
@@ -112,6 +114,28 @@ Tiles.Data = {
           x = 102,
           y = 34
         }
+      }
+    }
+  },
+  [4] = {
+    width = 51,
+    height = 51,
+    x = 1,
+    y = 51,
+  },
+  [5] = {
+    x = 52,
+    y = 51,
+    width = 14,
+    height = 20,
+    random = {
+      [1] = {
+        x = 64,
+        y = 51
+      },
+      [2] = {
+        x = 88,
+        y = 51
       }
     }
   }

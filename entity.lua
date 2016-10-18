@@ -26,11 +26,11 @@ function Entity:end_draw()
 end
 
 function Entity:call_load()
-  if self.subentities then
-    for objectId, subentity in ipairs(self.subentities) do
-      subentity:call_load()
-    end
-  end
+  -- if self.subentities then
+  --   for objectId, subentity in ipairs(self.subentities) do
+  --     subentity:call_load()
+  --   end
+  -- end
   self:load()
 end
 
@@ -56,6 +56,7 @@ end
 function Entity:addSubentity(entity)
   entity.superentity = self
   table.insert(self.subentities, entity)
+  entity:load()
 end
 
 return Entity

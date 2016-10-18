@@ -37,8 +37,8 @@ end
 
 function GameMap:draw()
   local camera = self.superentity.camera
-  local visible_tile_x = math.ceil((camera.x - love.graphics.getWidth() / 4) / 16)
-  local visible_tile_y = math.ceil((camera.y - love.graphics.getHeight() / 4) / 16)
+  local visible_tile_x = math.ceil((camera.x - love.graphics.getWidth() / 2 / camera.scale) / 16)
+  local visible_tile_y = math.ceil((camera.y - love.graphics.getHeight() / 2 / camera.scale) / 16)
   local visible_tile_width = math.ceil(love.graphics.getWidth() / 16 / camera.scale)
   local visible_tile_height = math.ceil(love.graphics.getHeight() / 16 / camera.scale)
   for x = visible_tile_x, visible_tile_x + visible_tile_width do
@@ -97,11 +97,53 @@ function GameMap:draw()
           if tile and adjCode and tile_to_draw.edges[tile][adjCode] then
             love.graphics.draw(self.spritesheet, tile_to_draw.edges[tile][adjCode].quad, (x - 1) * 16, (y - 1) * 16)
           else
-            if #adjCode > 0 then
-              print(adjCode)
-            end
             love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 16, (y - 1) * 16)
           end
+        end
+        -- print(tile_to_draw)
+      end
+    end
+  end
+  for x = visible_tile_x, visible_tile_x + visible_tile_width do
+    for y = visible_tile_y, visible_tile_y + visible_tile_height do
+      if self:get_tile(x, y) == Tiles.ID.GRASS then
+        can_place = true
+        if self:get_tile(x, y - 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x, y + 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x - 1, y) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x + 1, y) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x - 1, y - 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x + 1, y - 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x - 1, y + 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        if self:get_tile(x + 1, y + 1) == Tiles.ID.WATER then
+          can_place = false
+        end
+        math.randomseed(x + y * 100)
+        if math.random() < 0.1 then -- foliage
+          foliage_tile = Tiles.Data[Tiles.ID.FOLIAGE]
+          randNum = math.floor(math.random() * (1 + #foliage_tile.random))
+          if randNum == 0 then
+            love.graphics.draw(self.spritesheet, foliage_tile.quad, (x - 1) * 16, (y - 1) * 16)
+          else
+            love.graphics.draw(self.spritesheet, foliage_tile.random[randNum].quad, (x - 1) * 16, (y - 1) * 16)
+          end
+        end
+        if math.random() < 0.01 and can_place then -- trees
+          love.graphics.draw(self.spritesheet, Tiles.Data[Tiles.ID.TREE].quad, (x - 1) * 16, (y - 1) * 16)
         end
       end
     end
