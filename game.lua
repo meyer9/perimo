@@ -31,7 +31,7 @@ function Game:initialize()
   self.player = Player:new(true)
   self:addSubentity(self.player)
 
-  self.camera = Camera(0, 0, 2)
+  self.camera = Camera(0, 0, 0.03)
 
 end
 

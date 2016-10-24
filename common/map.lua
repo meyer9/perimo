@@ -8,6 +8,7 @@ package.path = package.path .. ";../?.lua" -- include from top directory
 
 -- Third-party Imports
 local class = require 'middleclass'
+local perlin = require 'common.noise'
 
 -- Local Imports
 local Entity = require 'entity'
@@ -42,86 +43,53 @@ function Map:set_tile(x, y, tile)
   self:changed()
 end
 
+function fBm(x, y, z, octaves, lacunarity, gain)
+  if not octaves then octaves = 8 end
+  if not lacunarity then lacunarity = 2.0 end
+  if not gain then gain = 0.5 end
+  amplitude = 1.0
+  frequency = 1.0
+  sum = 0.0
+  for i = 0, octaves do
+    sum = sum + amplitude * noise(x * frequency, y * frequency, z * frequency)
+    amplitude = amplitude * gain
+    frequency = frequency * lacunarity
+  end
+  return sum;
+end
+
 function Map:generate_island()
-  cycles = 100
-  center_weight = 10
-  math.randomseed(os.time() - os.clock() * 1000)
-  amount = (self.width + self.height) / 2 / 5
-  for x = 1, self.width do
-    for y = 1, self.height do
-      tile = Tiles.ID.GRASS
-      if math.random() * math.sqrt((x - (self.width / 2)) ^ 2 + (y - (self.height / 2)) ^ 2) > amount then tile = Tiles.ID.WATER end
-      self:set_tile(x, y, tile)
-    end
-  end
-  for x = 1, cycles do
-    print("Pass " .. x .. " / " .. cycles)
-    new_map = {}
-    for x = 1, self.width do
-      new_map[x] = {}
-      for y = 1, self.height do
-        numNeighbors = 0
-        if self:get_tile(x + 1, y) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x - 1, y) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x, y + 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x, y - 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x + 1, y + 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x + 1, y - 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x - 1, y + 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if self:get_tile(x - 1, y - 1) == Tiles.ID.GRASS then
-          numNeighbors = numNeighbors + 1
-        end
-        if (numNeighbors > 3 and self:get_tile(x, y) == Tiles.ID.GRASS) or (numNeighbors > 4 and self:get_tile(x, y) == Tiles.ID.WATER) then
-            new_map[x][y] = Tiles.ID.GRASS
-        else
-          new_map[x][y] = Tiles.ID.WATER
-        end
-      end
-    end
-    self.map_data = new_map
-    self:changed()
-    new_map = nil
-  end
-  new_map = Util.clone(self.map_data)
-  distance_from_water = {}
-  for x = 1, self.width do
-    table.insert(distance_from_water, {})
-    for y = 1, self.height do
-      if self:get_tile(x, y) == Tiles.ID.GRASS then
-        local nearOcean = false
-        local radius = 4
-        tiles_to_check = {}
-        for n = -radius, radius do
-          for m = -radius, radius do
-            -- print(n ^ 2, m ^ 2, radius ^ 2)
-            if n ^ 2 + m ^ 2 < radius ^ 2 then
-              table.insert(tiles_to_check, {x + n, y + m})
-            end
+  smoothness = 20
+  iterations = 4
+  local n, amplitude
+  local smoothnessx = smoothness * self.width / 30
+  local smoothnessy = smoothness * self.height / 30
+
+  local seed = math.random() * 50000
+  for y = 1, self.height do
+      for x = 1, self.width do -- This never repeats
+          n = 0
+          amplitude = 2
+          -- Generate the terrain
+          -- 'n' is the height value of the terrain
+          for i = 1, iterations do
+              n = n + (perlin.perlin(x/(smoothnessx)*amplitude,
+                                    y/(smoothnessy)*amplitude,
+                                    seed)+1) / amplitude
+              amplitude = amplitude * 2
           end
-        end
-        for i, tile in ipairs(tiles_to_check) do
-          if self:get_tile(tile[1], tile[2]) == Tiles.ID.WATER then
-            nearOcean = true
+          -- Make the height value go to 0 near the edge
+          n = n * (1 - math.abs((x / self.width * 2) - 1))
+                * (1 - math.abs((y / self.height * 2) - 1))
+          bigness = 0.3
+          if n > bigness + 0.1 then
+            self:set_tile(x, y, Tiles.ID.GRASS)
+          elseif n > bigness then
+            self:set_tile(x, y, Tiles.ID.SAND)
+          else
+            self:set_tile(x, y, Tiles.ID.WATER)
           end
-        end
-        if nearOcean then new_map[x][y] = Tiles.ID.SAND end
       end
-    end
-    self.map_data = new_map
   end
 end
 

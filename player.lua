@@ -20,8 +20,8 @@ function Player:load(controllable)
 
   if not controllable then controllable = false end
   self.anim_index = 0
-  self.x = 0
-  self.y = 0
+  self.x = 4000
+  self.y = 4000
   self.speed = 1000
   self.dx = 0 -- how much moved in frame
   self.dy = 0
