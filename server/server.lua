@@ -38,7 +38,7 @@ function Server:initialize()
 
   self.running = true
 
-  self.map = Map:new(200, 200)
+  self.map = Map:new(1000, 1000)
 
   print("Generating map...")
   self.map:generate_island()
