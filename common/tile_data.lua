@@ -11,110 +11,98 @@ local Tiles = {}
 
 Tiles.ID = {
   EMPTY = 1,
-  GRASS = 2,
+  SAND = 2,
   WATER = 3,
   TREE = 4,
-  FOLIAGE = 5
+  FOLIAGE = 5,
+  GRASS = 6
 }
 
 Tiles.Data = {
   [1] = {
-    width = 16,
-    height = 16,
+    width = 32,
+    height = 32,
     should_draw = false
   },
   [2] = {
-    width = 16,
-    height = 16,
-    x = 85,
-    y = 0,
-    random = {
-      [1] = {
-        x = 85,
-        y = 17
+    width = 32,
+    height = 32,
+    x = 128,
+    y = 32,
+    edges = {
+      [3] = {
+        t = {
+          x = 128,
+          y = 0
+        },
+        b = {
+          x = 128,
+          y = 64
+        },
+        l = {
+          x = 96,
+          y = 32
+        },
+        r = {
+          x = 160,
+          y = 32
+        },
+        tl = {
+          x = 96,
+          y = 0
+        },
+        bl = {
+          x = 96,
+          y = 64
+        },
+        tr = {
+          x = 160,
+          y = 0
+        },
+        br = {
+          x = 160,
+          y = 64
+        },
+        dbl = {
+          x = 192,
+          y = 32
+        },
+        dbr = {
+          x = 224,
+          y = 32
+        },
+        dtl = {
+          x = 192,
+          y = 0
+        },
+        dtr = {
+          x = 224,
+          y = 0
+        },
+        tblr = {
+          x = 0,
+          y = 32
+        }
       }
     }
   },
   [3] = {
-    width = 16,
-    height = 16,
+    width = 32,
+    height = 32,
     x = 0,
     y = 0,
-    edges = {
-      [2] = {
-        tl = {
-          x = 34,
+    animated = {
+      frames = {
+        [1] = {
+          x = 32,
           y = 0
         },
-        t = {
-          x = 51,
+        [2] = {
+          x = 64,
           y = 0
-        },
-        tr = {
-          x = 68,
-          y = 0
-        },
-        r = {
-          x = 68,
-          y = 17
-        },
-        br = {
-          x = 68,
-          y = 34
-        },
-        b = {
-          x = 51,
-          y = 34
-        },
-        bl = {
-          x = 34,
-          y = 34
-        },
-        l = {
-          x = 34,
-          y = 17
-        },
-        dbl = {
-          x = 17,
-          y = 17
-        },
-        dbr = {
-          x = 0,
-          y = 17
-        },
-        dtl = {
-          x = 17,
-          y = 34
-        },
-        dtr = {
-          x = 0,
-          y = 34
-        },
-        tbl = {
-          x = 119,
-          y = 0
-        },
-        tbr = {
-          x = 102,
-          y = 17
-        },
-        tlr = {
-          x = 119,
-          y = 17
-        },
-        blr = {
-          x = 102,
-          y = 0
-        },
-        tb = {
-          x = 85,
-          y = 34
-        },
-        lr = {
-          x = 102,
-          y = 34
         }
-      }
+      },
+      time_between_frames = 0.7
     }
   },
   [4] = {
@@ -138,6 +126,64 @@ Tiles.Data = {
         y = 51
       }
     }
+  },
+  [6] = {
+    x = 128,
+    y = 128,
+    width = 32,
+    height = 32,
+    edges = {
+      [2] = {
+        t = {
+          x = 128,
+          y = 96
+        },
+        b = {
+          x = 128,
+          y = 160
+        },
+        l = {
+          x = 96,
+          y = 128
+        },
+        r = {
+          x = 160,
+          y = 128
+        },
+        tl = {
+          x = 96,
+          y = 96
+        },
+        bl = {
+          x = 96,
+          y = 160
+        },
+        tr = {
+          x = 160,
+          y = 96
+        },
+        br = {
+          x = 160,
+          y = 160
+        },
+        dbl = {
+          x = 192,
+          y = 135
+        },
+        dbr = {
+          x = 224,
+          y = 135
+        },
+        dtl = {
+          x = 192,
+          y = 103
+        },
+        dtr = {
+          x = 224,
+          y = 103
+        }
+      }
+    }
   }
 }
 -- AND HERE
@@ -158,6 +204,11 @@ function Tiles.generate_tiles(sw, sh)
       if tile.random then
         for n, random_tile in pairs(tile.random) do
           Tiles.Data[i].random[n].quad = love.graphics.newQuad(random_tile.x, random_tile.y, tile.width, tile.height, sw, sh)
+        end
+      end
+      if tile.animated then
+        for n, animated_frame in pairs(tile.animated.frames) do
+          Tiles.Data[i].animated.frames[n].quad = love.graphics.newQuad(animated_frame.x, animated_frame.y, tile.width, tile.height, sw, sh)
         end
       end
     end

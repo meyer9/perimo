@@ -15,14 +15,14 @@ local Bullet = require 'bullet'
 local Player = class('Player', Entity)
 
 function Player:load(controllable)
-  self.torsoAnimation = Animation:new('player.png', 32, 32, 4, 0.3)
-  self.legAnimation = Animation:new('legs_anim.png', 32, 32, 9, 0.1)
-  
+  self.torsoAnimation = Animation:new('player.png', 16, 16, 4, 0.3)
+  self.legAnimation = Animation:new('legs_anim.png', 16, 16, 9, 0.1)
+
   if not controllable then controllable = false end
   self.anim_index = 0
   self.x = 0
   self.y = 0
-  self.speed = 100
+  self.speed = 1000
   self.dx = 0 -- how much moved in frame
   self.dy = 0
   self.legSmooth = 0
@@ -72,8 +72,8 @@ function Player:draw()
 
   local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
 
-  love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 0.9, 0.9, 16, 16)
-  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 1, 1, 16, 16)
+  love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 2, 2, 8, 8)
+  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 2, 2, 8, 8)
 
   self.legSmooth = legRot
 end

@@ -20,7 +20,7 @@ local Game = class('Game', Entity)
 function Game:initialize()
   Entity.initialize(self)
   love.graphics.setDefaultFilter('nearest', 'nearest')
-  love.window.setMode(1280, 800, {msaa = 16, fullscreen = true})
+  -- love.window.setMode(1280, 800, {msaa = 32, fullscreen = true})
 
   self.map = GameMap:new()
   self:addSubentity(self.map)
@@ -48,15 +48,15 @@ function Game:update(dt)
   local smoother = Camera.smooth.damped(4)
   if self.player.x < love.graphics.getWidth() / 4 then
     self.camera:lockX(love.graphics.getWidth() / 4, smoother)
-  elseif self.player.x > (self.map.width * 16) - love.graphics.getWidth() / 4 then
-    self.camera:lockX((self.map.width * 16) - love.graphics.getWidth() / 4, smoother)
+  elseif self.player.x > (self.map.width * 32) - love.graphics.getWidth() / 4 then
+    self.camera:lockX((self.map.width * 32) - love.graphics.getWidth() / 4, smoother)
   else
     self.camera:lockX(self.player.x, smoother)
   end
   if self.player.y < love.graphics.getHeight() / 4 then
     self.camera:lockY(love.graphics.getHeight() / 4, smoother)
-  elseif self.player.y > (self.map.height * 16) - love.graphics.getHeight() / 4 then
-    self.camera:lockY((self.map.height * 16) - love.graphics.getHeight() / 4, smoother)
+  elseif self.player.y > (self.map.height * 32) - love.graphics.getHeight() / 4 then
+    self.camera:lockY((self.map.height * 32) - love.graphics.getHeight() / 4, smoother)
   else
     self.camera:lockY(self.player.y, smoother)
   end

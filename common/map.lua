@@ -43,7 +43,7 @@ function Map:set_tile(x, y, tile)
 end
 
 function Map:generate_island()
-  cycles = 10
+  cycles = 100
   center_weight = 10
   math.randomseed(os.time() - os.clock() * 1000)
   amount = (self.width + self.height) / 2 / 5
@@ -95,6 +95,33 @@ function Map:generate_island()
     self.map_data = new_map
     self:changed()
     new_map = nil
+  end
+  new_map = Util.clone(self.map_data)
+  distance_from_water = {}
+  for x = 1, self.width do
+    table.insert(distance_from_water, {})
+    for y = 1, self.height do
+      if self:get_tile(x, y) == Tiles.ID.GRASS then
+        local nearOcean = false
+        local radius = 4
+        tiles_to_check = {}
+        for n = -radius, radius do
+          for m = -radius, radius do
+            -- print(n ^ 2, m ^ 2, radius ^ 2)
+            if n ^ 2 + m ^ 2 < radius ^ 2 then
+              table.insert(tiles_to_check, {x + n, y + m})
+            end
+          end
+        end
+        for i, tile in ipairs(tiles_to_check) do
+          if self:get_tile(tile[1], tile[2]) == Tiles.ID.WATER then
+            nearOcean = true
+          end
+        end
+        if nearOcean then new_map[x][y] = Tiles.ID.SAND end
+      end
+    end
+    self.map_data = new_map
   end
 end
 
