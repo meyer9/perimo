@@ -6,10 +6,12 @@
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
-local socket = require('socket')
+local network = require('affair.network')
 local class = require('middleclass')
 local uuid = require('uuid')
+local socket = require('socket')
 
+local COMMANDS = require('common.commands')
 local Map = require('common.map')
 
 local Server = class('Server')
@@ -32,81 +34,61 @@ function Server:initialize()
   print('starting server on ' .. addr .. ':' .. port)
 
   -- setup udp socket
-  self.udp = socket.udp()
-  self.udp:settimeout(0)
-  self.udp:setsockname(addr, port)
+  self.server, err = network:startServer(16, port, 1)
+  function callHandle(...)
+    return self:handle_message(...)
+  end
+
+  function callAuth(...)
+    return self:auth(...)
+  end
+
+  function callSync(...)
+    return self:synchronize(...)
+  end
+  self.server.callbacks.received = serverReceive
+  self.server.callbacks.authorize = callAuth
+  self.server.callbacks.synchronize = callSync
+
+  if not self.server then
+    print('Server creation failed.')
+    print(err)
+    os.exit(0)
+  end
 
   self.running = true
 
-  self.map = Map:new(1000, 1000)
+  self.map = Map:new(200, 200)
 
   print("Generating map...")
   self.map:generate_island()
   print("Finished.")
 
-  self.message_pieces = {}
+  self.time = socket.gettime()
+  self.dt = 0
 end
 
---- sends a message to a client at ip:port
--- @param message the message to send
--- @param ip the ip to send the message to
--- @param port the port to send the message to
-function Server:send(message, ip, port)
-  print('sending message of length ' .. #message)
-  local numPieces = math.ceil(#message / 7000)
-  local sent = 0
-  local length = math.ceil(#message / numPieces)
-  local uuid_msg = uuid()
-  if numPieces == 1 then
-    self.udp:sendto(uuid_msg .. " 1 1 " .. message, ip, port)
-    return
-  end
-  for i = 0, numPieces - 1 do
-    if i == numPieces - 1 then
-      -- print("Sending " + ((i+1) / numPieces * 100) + "%...")
-      self.udp:sendto(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, #message), ip, port)
-    else
-      -- print("Sending " + ((i+1) / numPieces * 100) + "%...")
-      self.udp:sendto(uuid_msg .. " " .. i + 1 .. " " .. numPieces .. " " .. message:sub(i * length + 1, (i + 1) * length), ip, port)
-    end
-  end
+function Server:auth(user, authMsg)
+  return true
 end
 
-function Server:handle_message(message, ip, port)
-  cmd, parms = message:match("^(%S*) (.*)")
-  if cmd == 'handshake' then -- add authentication here
-    client_uuid = uuid()
-    currentClients[client_uuid] = {}
-    self:send('handshake ' .. client_uuid, ip,  port)
-  elseif cmd == 'map' then
-    local serialized_map = self.map:serialize()
-    self:send('map ' .. serialized_map, ip, port)
-  end
+function Server:handle_message(cmd, parms)
 end
 
-function Server:loop()
-  local data, msg_or_ip, port_or_nil = self.udp:receivefrom()
-	if data then
-    local id, i, numParts, message = data:match("^(%S*) (%d*) (%d*) (.*)")
-    local i = tonumber(i)
-    local numParts = tonumber(numParts)
-    if numParts ~= 1 then
-      if numParts == i then
-        self:handle_message(self.message_pieces[id] .. message, msg_or_ip, port_or_nil)
-        self.message_pieces[id] = nil
-      end
-      if self.message_pieces[id] then
-        self.message_pieces[id] = self.message_pieces[id] .. message
-      else
-        self.message_pieces[id] = message
-      end
-    else
-      self:handle_message(message, msg_or_ip, port_or_nil)
-    end
-  elseif msg_or_ip ~= 'timeout' then
-		error("Unknown network error: " .. tostring(msg))
-	end
-  -- socket.sleep(0.001)
+function Server:synchronize(user)
+  local serialized_map = self.map:serialize()
+  self.server:send(COMMANDS['map'], serialized_map, user)
+end
+
+function Server:update()
+  self.server:update(self.dt)
+
+	self.dt = socket.gettime() - self.time
+	self.time = socket.gettime()
+
+	-- This is important. Play with this value to fit your need.
+	-- If you don't use this sleep command, the CPU will be used as much as possible, you'll probably run the game loop WAY more often than on the clients (who also require time to render the picture - something you don't need)
+	socket.sleep( 0.05 )
 end
 
 return Server

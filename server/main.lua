@@ -5,9 +5,11 @@
 ------------------------------------------------------------------------------
 
 local Server = require('server')
+local socket = require('socket')
+local network = require
 
 local server = Server:new()
 
-while server.running do
-  server:loop()
+while true do
+	server:update()
 end
