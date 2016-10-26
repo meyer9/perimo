@@ -25,13 +25,13 @@ function Game:initialize()
   self.map = GameMap:new()
   self:addSubentity(self.map)
 
+  self.player = Player:new(true, "player" .. math.floor(math.random() * 100))
+  self:addSubentity(self.player)
+
   self.multiplayer = Multiplayer:new()
   self:addSubentity(self.multiplayer)
 
-  self.player = Player:new(true)
-  self:addSubentity(self.player)
-
-  self.camera = Camera(0, 0, 0.03)
+  self.camera = Camera(0, 0, 2)
 
 end
 

@@ -21,7 +21,7 @@ function Multiplayer:connect(host, port)
   if not host then host = 'localhost' end
   if not port then port = 1337 end
   print('Connecting to ' .. host .. ':' .. port)
-  self.client, err = network:startClient( host, "player" .. math.floor(math.random() * 100), port, "authed" )
+  self.client, err = network:startClient( host, self.superentity.player.name, port, "authed" )
   if not self.client then
     print('Failed to connect to ' .. host .. ':' .. port .. '.')
     print(err)
