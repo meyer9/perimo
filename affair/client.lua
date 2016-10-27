@@ -17,7 +17,7 @@ local numberOfUsers = 0
 local partMessage = ""
 local messageLength = nil
 
-function Client:new( address, port, playerName, authMsg )
+function Client:new( address, port, playerName, authMsg, portUDP )
 	local o = {}
 	setmetatable( o, self )
 
@@ -26,6 +26,12 @@ function Client:new( address, port, playerName, authMsg )
 	print("[NET] Initialising Client...")
 	o.conn = socket.tcp()
 	o.conn:settimeout(5)
+
+	o.connUDP = socket.udp()
+	o.connUDP:settimeout(0)
+
+	o.connUDP:setpeername(address, portUDP or port + 1)
+
 	local ok, msg = o.conn:connect( address, port )
 	--ok, o.conn = pcall(o.conn.connect, o.conn, address, port)
 	if ok and o.conn then
@@ -232,21 +238,24 @@ function Client:received( command, msg )
 	end
 end
 
-function Client:send( command, msg )
+function Client:send( command, msg, udp )
 
 	local fullMsg = string.char(command) .. (msg or "") --.. "\n"
 
 	local len = #fullMsg
+	assert( not udp or len < 2 ^ 13 - 1, "UDP Packets may not be larger than 8192 bytes")
 	assert( len < 256^4, "Length of packet must not be larger than 4GB" )
 
-	print(len)
+	if udp then
+		self.connUDP:send(self.authKey .. '|' .. fullMsg)
+	else
+		fullMsg = utility:lengthToHeader( len ) .. fullMsg
 
-	fullMsg = utility:lengthToHeader( len ) .. fullMsg
-
-	local result, err, num = self.conn:send( fullMsg )
-	while err == "timeout" do
-		fullMsg = fullMsg:sub( num+1, #fullMsg )
-		result, err, num = self.conn:send( fullMsg )
+		local result, err, num = self.conn:send( fullMsg )
+		while err == "timeout" do
+			fullMsg = fullMsg:sub( num+1, #fullMsg )
+			result, err, num = self.conn:send( fullMsg )
+		end
 	end
 
 	return
@@ -267,11 +276,12 @@ function Client:close()
 	end
 end
 
-function Client:setUserValue( key, value )
+function Client:setUserValue( key, value, udp )
+	udp = udp or false
 	local keyType = type( key )
 	local valueType = type( value )
 	self:send( CMD.USER_VALUE, keyType .. "|" .. tostring(key) ..
-			"|" .. valueType .. "|" .. tostring(value) )
+			"|" .. valueType .. "|" .. tostring(value), udp)
 end
 
 function Client:getID()

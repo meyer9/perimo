@@ -41,6 +41,7 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 
 	o.connUDP = assert(socket.udp())
 	o.connUDP:settimeout(0)
+	print(portUDP or port + 1)
 	o.connUDP:setsockname('*', portUDP or port + 1)
 
 	o.callbacks = {
@@ -158,10 +159,24 @@ function Server:update( dt )
 			u.ping.timer = u.ping.timer + dt
 		end
 
-		return true
 	end
+	-- print(self.conn, self.connUDP)
 	if self.connUDP then
+		msg, __, _ = self.connUDP:receivefrom()
+		if msg then
+			authKey, command, content = string.match( msg, "(%d+)|(.)(.*)")
+			command = string.byte( command )
+
+			id = authKeyAssoc[authKey]
+			u = userList[id]
+
+			if u then
+				self:received( command, content, u )
+			end
+			return true
+		end
 	end
+	return false
 end
 
 function Server:received( command, msg, user )
