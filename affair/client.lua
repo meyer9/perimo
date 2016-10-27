@@ -156,13 +156,18 @@ function Client:update( dt )
 				print("[NET] Err Received:", msg, data)
 			end
 		end]]
-		return true
-	else
-		return false
+	end
+	if self.connUDP then
+		msg, _ = self.connUDP:receive()
+		if msg then
+			command, content = string.match( msg, "(.)(.*)")
+			command = string.byte( command )
+			self:received( command, content, true)
+		end
 	end
 end
 
-function Client:received( command, msg )
+function Client:received( command, msg, udp )
 	if command == CMD.PING then
 		-- Respond to ping:
 		self:send( CMD.PONG, "" )
@@ -190,7 +195,6 @@ function Client:received( command, msg )
 			self.callbacks.otherUserDisconnected( u )
 		end
 	elseif command == CMD.AUTHORIZED then
-		print(msg)
 		local authed, reason, authKey = string.match( msg, "(.*)|(.*)|(.*)" )
 		self.authKey = tonumber(authKey)
 		if authed == "true" then
@@ -224,6 +228,7 @@ function Client:received( command, msg )
 		id = tonumber( id )
 
 		userList[id].customData[key] = value
+		print(msg)
 
 		if self.callbacks.customDataChanged then
 			self.callback.customDataChanged( user, value, key )

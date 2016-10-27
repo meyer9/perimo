@@ -41,7 +41,6 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 
 	o.connUDP = assert(socket.udp())
 	o.connUDP:settimeout(0)
-	print(portUDP or port + 1)
 	o.connUDP:setsockname('*', portUDP or port + 1)
 
 	o.callbacks = {
@@ -162,16 +161,16 @@ function Server:update( dt )
 	end
 	-- print(self.conn, self.connUDP)
 	if self.connUDP then
-		msg, __, _ = self.connUDP:receivefrom()
+		msg, ip, port = self.connUDP:receivefrom()
 		if msg then
 			authKey, command, content = string.match( msg, "(%d+)|(.)(.*)")
 			command = string.byte( command )
-
-			id = authKeyAssoc[authKey]
+			id = authKeyAssoc[tonumber(authKey)]
 			u = userList[id]
-
 			if u then
-				self:received( command, content, u )
+				if not u.ip then u.ip = ip end
+				if not u.port then u.port = port end
+				self:received( command, content, u, true)
 			end
 			return true
 		end
@@ -179,7 +178,8 @@ function Server:update( dt )
 	return false
 end
 
-function Server:received( command, msg, user )
+function Server:received( command, msg, user, udp )
+	udp = udp or false
 	if command == CMD.PONG then
 		if user.ping.waitingForPong then
 			user.ping.pingReturnTime = math.floor(1000*user.ping.timer+0.5)
@@ -187,7 +187,7 @@ function Server:received( command, msg, user )
 			user.ping.waitingForPong = false
 			-- let all users know about this user's pingtime:
 			if SYNCH_PINGS then
-				self:send( CMD.USER_PINGTIME, user.id .. "|" .. user.ping.pingReturnTime )
+				self:send( CMD.USER_PINGTIME, user.id .. "|" .. user.ping.pingReturnTime, udp )
 			end
 		end
 	elseif command == CMD.PLAYERNAME then
@@ -220,10 +220,10 @@ function Server:received( command, msg, user )
 
 		-- Let user know about the (possibly corrected) username and his
 		-- client id:
-		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName, user )
+		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName, user, udp )
 
 		-- Let all users know about the new user...
-		self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName )
+		self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName, nil, udp )
 
 		self:synchronizeUser( user )
 
@@ -242,7 +242,7 @@ function Server:received( command, msg, user )
 		user.customData[key] = value
 
 		-- Let others know about this value:
-		self:send( CMD.USER_VALUE, user.id .. "|" .. msg )
+		self:send( CMD.USER_VALUE, user.id .. "|" .. msg, nil, udp )
 
 		if self.callbacks.customDataChanged then
 			self.callbacks.customDataChanged( user, value, key, prevValue )
@@ -290,30 +290,44 @@ function Server:synchronizeUser( user )
 end
 
 
-function Server:send( command, msg, user )
+function Server:send( command, msg, user, udp )
+	udp = udp or false
 	-- Send to only one user:
-	if user then
+	if udp and (not user or user.port and user.ip) then
 		local fullMsg = string.char(command) .. (msg or "") --.. "\n"
+		if user then
+			self.connUDP:sendto(fullMsg, user.ip, user.port)
+		else
+			for k, u in pairs( userList ) do
+				if u.port and u.ip then
+					self.connUDP:sendto( fullMsg, u.ip, u.port )
+				end
+			end
+		end
+	else
+		if user then
+			local fullMsg = string.char(command) .. (msg or "") --.. "\n"
 
-		local len = #fullMsg
-		assert( len < 256^4, "Length of packet must not be larger than 4GB" )
+			local len = #fullMsg
+			assert( len < 256^4, "Length of packet must not be larger than 4GB" )
 
-		fullMsg = utility:lengthToHeader( len ) .. fullMsg
+			fullMsg = utility:lengthToHeader( len ) .. fullMsg
 
-		--user.connection:send( string.char(command) .. (msg or "") .. "\n" )
-		local result, err, num = user.connection:send( fullMsg )
-		while err == "timeout" do
-			fullMsg = fullMsg:sub( num+1, #fullMsg )
-			result, err, num = user.connection:send( fullMsg )
+			--user.connection:send( string.char(command) .. (msg or "") .. "\n" )
+			local result, err, num = user.connection:send( fullMsg )
+			while err == "timeout" do
+				fullMsg = fullMsg:sub( num+1, #fullMsg )
+				result, err, num = user.connection:send( fullMsg )
+			end
+
+			return
 		end
 
-		return
-	end
-
-	-- If no user is given, broadcast to all.
-	for k, u in pairs( userList ) do
-		if u.connection and u.synchronized then
-			self:send( command, msg, u )
+		-- If no user is given, broadcast to all.
+		for k, u in pairs( userList ) do
+			if u.connection and u.synchronized then
+				self:send( command, msg, u )
+			end
 		end
 	end
 end

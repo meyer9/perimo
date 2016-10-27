@@ -46,10 +46,6 @@ function Server:initialize()
   function callSync(...)
     return self:synchronize(...)
   end
-
-  function newUserData(...)
-    print(...)
-  end
   self.server.callbacks.received = serverReceive
   self.server.callbacks.authorize = callAuth
   self.server.callbacks.synchronize = callSync
