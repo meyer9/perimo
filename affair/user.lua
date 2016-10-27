@@ -1,7 +1,7 @@
 local User = {}
 User.__index = User
 
-function User:new( connection, playerName, id )
+function User:new( connection, playerName, id, authKey )
 	local o = {}
 	setmetatable( o, self )
 	o.connection = connection
@@ -14,6 +14,7 @@ function User:new( connection, playerName, id )
 	o.id = id
 	o.authorized = false
 	o.synchronized = false
+	if authKey then o.authKey = authKey else o.authKey = -1 end
 
 	o.ping = {
 		timer = 0,
@@ -22,7 +23,7 @@ function User:new( connection, playerName, id )
 		}
 
 	o.customData = {}
-	
+
 	return o
 end
 

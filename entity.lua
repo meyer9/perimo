@@ -25,6 +25,9 @@ end
 function Entity:end_draw()
 end
 
+function Entity:mpTick()
+end
+
 function Entity:call_load()
   -- if self.subentities then
   --   for objectId, subentity in ipairs(self.subentities) do
@@ -37,7 +40,9 @@ end
 function Entity:call_update(dt)
   if self.subentities then
     for objectId, subentity in ipairs(self.subentities) do
-      subentity:call_update(dt)
+      if subentity ~= nil then
+        subentity:call_update(dt)
+      end
     end
   end
   self:update(dt)
@@ -47,7 +52,9 @@ function Entity:call_draw()
   self:draw()
   if self.subentities then
     for objectId, subentity in ipairs(self.subentities) do
-      subentity:call_draw()
+      if subentity ~= nil then
+        subentity:call_draw()
+      end
     end
   end
   self:end_draw()
@@ -55,8 +62,33 @@ end
 
 function Entity:addSubentity(entity)
   entity.superentity = self
+  local foundGame = false
+  local gameCandidate = self
+  if self.game == nil then
+    while foundGame == false do
+      if gameCandidate.superentity ~= nil then
+        gameCandidate = entity.superentity
+      else
+        foundGame = true
+      end
+    end
+  else
+    gameCandidate = self.game
+  end
+  entity.game = gameCandidate
   table.insert(self.subentities, entity)
   entity:load()
+end
+
+function Entity:call_mpTick()
+  self:mpTick()
+  if self.subentities then
+    for objectId, subentity in ipairs(self.subentities) do
+      if subentity ~= nil then
+        subentity:call_mpTick()
+      end
+    end
+  end
 end
 
 return Entity

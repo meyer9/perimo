@@ -12,6 +12,7 @@ local Entity = require 'entity'
 local GameMap = require 'gamemap'
 local Multiplayer = require 'multiplayer_handler'
 local Player = require 'player'
+local MultiplayerPlayers = require 'multiplayer_players'
 local Camera = require 'camera'
 
 
@@ -22,17 +23,23 @@ function Game:initialize()
   love.graphics.setDefaultFilter('nearest', 'nearest')
   -- love.window.setMode(1280, 800, {msaa = 32, fullscreen = true})
 
+  self.tickrate = 16
+
   self.map = GameMap:new()
   self:addSubentity(self.map)
 
+  math.randomseed(os.clock())
+
   self.player = Player:new(true, "player" .. math.floor(math.random() * 100))
   self:addSubentity(self.player)
+
+  self.multiplayer_players = MultiplayerPlayers:new()
+  self:addSubentity(self.multiplayer_players)
 
   self.multiplayer = Multiplayer:new()
   self:addSubentity(self.multiplayer)
 
   self.camera = Camera(0, 0, 2)
-
 end
 
 function Game:load()
@@ -44,7 +51,7 @@ end
 -- end
 
 function Game:update(dt)
-  self.multiplayer:update()
+  self.multiplayer:update(dt)
   local smoother = Camera.smooth.damped(4)
   if self.player.x < love.graphics.getWidth() / 4 then
     self.camera:lockX(love.graphics.getWidth() / 4, smoother)

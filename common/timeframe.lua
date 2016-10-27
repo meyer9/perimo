@@ -69,8 +69,4 @@ function Timeframe:at(time, interpolate)
   return state
 end
 
-local tf = Timeframe:new(1000)
-for i=1, 100 do
-  tf:snapshot(i * 2, i)
-  print(i * 2, i)
-end
+return Timeframe

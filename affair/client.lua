@@ -51,6 +51,7 @@ function Client:new( address, port, playerName, authMsg )
 	partMessage = ""
 
 	o.clientID = nil
+	o.authKey = -1
 	o.playerName = playerName
 
 	numberOfUsers = 0
@@ -58,11 +59,20 @@ function Client:new( address, port, playerName, authMsg )
 	-- Filled if user is kicked:
 	o.kickMsg = ""
 
+	-- o.bps = 0
+	-- o.nextSec = 1
+
 	return o
 end
 
 function Client:update( dt )
 	if self.conn then
+		-- self.nextSec = self.nextSec - dt
+		-- if self.nextSec <= 0 then
+		-- 	print(self.bps)
+		-- 	self.bps = 0
+		-- 	self.nextSec = 1
+		-- end
 		local data, msg, partOfLine = self.conn:receive( 9999 )
 		if data then
 			partMessage = partMessage .. data
@@ -99,7 +109,7 @@ function Client:update( dt )
 			if #partMessage >= messageLength then
 				-- Get actual message:
 				local currentMsg = partMessage:sub(1, messageLength)
-				
+
 				-- Remember rest of already received messages:
 				partMessage = partMessage:sub( messageLength + 1, #partMessage )
 
@@ -141,7 +151,7 @@ function Client:update( dt )
 			end
 		end]]
 		return true
-	else	
+	else
 		return false
 	end
 end
@@ -174,7 +184,9 @@ function Client:received( command, msg )
 			self.callbacks.otherUserDisconnected( u )
 		end
 	elseif command == CMD.AUTHORIZED then
-		local authed, reason = string.match( msg, "(.*)|(.*)" )
+		print(msg)
+		local authed, reason, authKey = string.match( msg, "(.*)|(.*)|(.*)" )
+		self.authKey = tonumber(authKey)
 		if authed == "true" then
 			self.authorized = true
 			print( "[NET] Connection authorized by server." )
@@ -183,7 +195,7 @@ function Client:received( command, msg )
 		else
 			print( "[NET] Not authorized to join server. Reason: " .. reason )
 		end
-		
+
 		if self.callbacks.authorized then
 			self.callbacks.authorized( self.authorized, reason )
 		end
@@ -226,6 +238,8 @@ function Client:send( command, msg )
 
 	local len = #fullMsg
 	assert( len < 256^4, "Length of packet must not be larger than 4GB" )
+
+	print(len)
 
 	fullMsg = utility:lengthToHeader( len ) .. fullMsg
 

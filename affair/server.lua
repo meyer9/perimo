@@ -18,6 +18,7 @@ Server.__index = Server
 local userList = {}
 local numberOfUsers = 0
 local userListByName = {}
+local authKeyAssoc = {}
 local authorizationTimeout = {}
 
 local MAX_PLAYERS = 16
@@ -38,6 +39,10 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 		print("[NET]\t-> started.")
 	end
 
+	o.connUDP = assert(socket.udp())
+	o.connUDP:settimeout(0)
+	o.connUDP:setsockname('*', portUDP or port + 1)
+
 	o.callbacks = {
 		received = nil,
 		disconnectedUser = nil,
@@ -49,13 +54,14 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 
 	userList = {}
 	userListByName = {}
+	authKeyAssoc = {}
 	numberOfUsers = 0
 	PINGTIME = pingTime or 5
 
 	MAX_PLAYERS = maxNumberOfPlayers or 16
 
 	o.port = port
-	o.portUDP = portUDP
+	o.portUDP = portUDP or port + 1
 	o.advertisement = {}
 
 	return o
@@ -69,7 +75,10 @@ function Server:update( dt )
 			newConnection:settimeout(0)
 
 			local id = findFreeID()
-			local newUser = User:new( newConnection, "Unknown", id )
+			local authKey = math.floor(math.random() * 100000000000000)
+			authKeyAssoc[authKey] = id
+
+			local newUser = User:new( newConnection, "Unknown", id, authKey )
 
 			userList[id] = newUser
 
@@ -80,7 +89,7 @@ function Server:update( dt )
 			print( "[NET] Client attempting to connect (" .. id .. ")" )
 		end
 
-		for k, u in pairs(userList) do			
+		for k, u in pairs(userList) do
 
 			local data, msg, partOfLine = u.connection:receive( 9999 )
 			if data then
@@ -96,7 +105,7 @@ function Server:update( dt )
 					numberOfUsers = numberOfUsers - 1
 
 					self:disconnectedUser( u )
-					
+
 					userList[k] = nil
 					if userListByName[ u.playerName ] then
 						userListByName[ u.playerName ] = nil
@@ -133,16 +142,6 @@ function Server:update( dt )
 				end
 			end
 
-			-- Fallback for backwards compability with clients which don't send an authorization
-			-- request:
-			if not u.authorized then
-				u.authorizationTimeout = u.authorizationTimeout - dt
-				-- Force authorization test now, with empty auth message:
-				if u.authorizationTimeout < 0 then
-					self:authorize( u, "" )
-				end
-			end
-
 			-- Every PINGTIME seconds, ping the user and wait for a pong.
 			-- Check if we already pinged and if not, send a ping:
 			if not u.ping.waitingForPong then
@@ -160,8 +159,8 @@ function Server:update( dt )
 		end
 
 		return true
-	else
-		return false
+	end
+	if self.connUDP then
 	end
 end
 
@@ -177,7 +176,7 @@ function Server:received( command, msg, user )
 			end
 		end
 	elseif command == CMD.PLAYERNAME then
-		
+
 		local name, authRequest = msg:match("(.-)|(.*)")
 		if not name or not authRequest then
 			name = msg
@@ -325,7 +324,7 @@ function Server:authorize( user, authMsg )
 	end
 
 	if authorized then
-		self:send( CMD.AUTHORIZED, "true|" .. user.id, user )
+		self:send( CMD.AUTHORIZED, "true|" .. user.id .. '|' .. user.authKey, user )
 		user.authorized = true
 	else
 		self:send( CMD.AUTHORIZED, "false|" .. reason, user )
