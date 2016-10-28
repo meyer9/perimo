@@ -90,7 +90,7 @@ function GameMap:draw()
   local visible_tile_width = math.ceil(love.graphics.getWidth() / camera.scale)
   local visible_tile_height = math.ceil(love.graphics.getHeight() / camera.scale)
 
-  gridSize = 20 -- if less than 20, strange behavior may occur.
+  gridSize = 10 -- if less than 20, strange behavior may occur.
   variance = 0.4
   points = {}
   triangles = {}
@@ -103,39 +103,36 @@ function GameMap:draw()
   math.randomseed(gridSize * 100/variance)
   for m = startPosY,  math.ceil((visible_tile_y + visible_tile_height) / gridSize) + 2 do
     for n = math.ceil(visible_tile_x / gridSize) - 2,  math.ceil((visible_tile_x + visible_tile_width) / gridSize) + 2 do
-      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2, m * gridSize})
+      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 + math.random() * variance, m * gridSize + math.random() * variance})
     end
   end
   print(math.ceil(visible_tile_y / gridSize) - 2, numTilesCol)
   local sizeX = visible_tile_width
   local sizeY = visible_tile_height
-
-  fixer = 0
-
-  for f = -3, 3 do
-    if points[3 + numTilesRow + f][1] > points[3][1] and points[3 + numTilesRow + f][1] < points[4][1] then
-      fixer = f
-    end
-  end
-
+  print(numTilesRow)
   for n = 1, #points do
-    if n < #points - numTilesRow and n % numTilesRow ~= 0 then
+    if n < #points - numTilesRow and n % numTilesRow ~= 0  and n % numTilesRow ~= 1 then
       tile_offset = (math.ceil(n / numTilesRow) % 2) + ((startPosY + 1) % 2)
       if tile_offset == 2 then tile_offset = 0 end
+      -- if points[n][1] - points[n + numTilesRow - 1][1] < -400 then
+      --   print(n % numTilesRow)
+      -- end
       table.insert(triangles, {points[n][1], points[n][2], points[n + 1][1], points[n + 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow + tile_offset][2]})
+      table.insert(triangles, {points[n][1], points[n][2], points[n + numTilesRow + tile_offset - 1][1], points[n + numTilesRow + tile_offset - 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow][2]})
     end
   end
 
   for _, triangle in pairs(triangles) do
+    -- print(triangle[1] - triangle[5] < -440
+    love.graphics.setColor(60, 60, 220 + math.random() * 35)
     love.graphics.polygon('fill', triangle)
+    love.graphics.polygon('line', triangle)
   end
+  love.graphics.setColor(255, 255, 255)
 
 
   for _, point in pairs(points) do
     love.graphics.points(point)
-    love.graphics.setColor(255, 0, 0)
-    love.graphics.print(_, point[1], point[2])
-    love.graphics.setColor(255, 255, 255)
   end
   -- Util.print_r({{'test'}})
 
