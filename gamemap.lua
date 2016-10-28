@@ -97,9 +97,10 @@ function GameMap:draw()
   numTilesCol = math.ceil((visible_tile_y + visible_tile_height + gridSize * 2) / gridSize) - math.ceil((visible_tile_y - gridSize * 2) / gridSize)
 
   --pointy things
+  math.randomseed(gridSize * 100/variance)
   for m = math.ceil((visible_tile_y - gridSize * 3) / gridSize),  math.ceil((visible_tile_y + visible_tile_width + gridSize * 3) / gridSize) do
     for n = math.ceil((visible_tile_x - gridSize * 3) / gridSize),  math.ceil((visible_tile_x + visible_tile_height + gridSize * 3) / gridSize) do
-      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2, m * gridSize})
+      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 , m * gridSize})
     end
   end
   local sizeX = visible_tile_width
@@ -127,14 +128,6 @@ function GameMap:draw()
     end
   end
 
-  --  if ((n + 1)/(1 + (sizeX + 2 * gridSize)/gridSize)) % 2 == 0 and n / ((sizeX + 2 * gridSize)/gridSize + 1) % 2 == 0 then
-  --    table.insert(triangles, {points[n], points[n + 1], points[n + (sizeX + 2 * gridSize)/gridSize + 2]})
---      table.insert(triangles, {points[n], points[n + (sizeX + 2 * gridSize)/gridSize + 1], points[n + (sizeX + 2 * gridSize)/gridSize + 2]})
-  --  else --(((n + 1)/(1 + (sizeX + 2 * gridSize)/gridSize)) % 2 == 1 and n / ((sizeX + 2 * gridSize)/gridSize + 1) % 2 == 1) then
-  --    table.insert(triangles, {points[n], points[n + 1], points[n + (sizeX + 2 * gridSize)/gridSize + 1]})
-  --    table.insert(triangles, {points[n + 1], points[n + (sizeX + 2 * gridSize)/gridSize + 1], points[n + (sizeX + 2 * gridSize)/gridSize + 2]})
-  --  end
-  -- end
   for _, point in pairs(points) do
     love.graphics.points(point)
   end
