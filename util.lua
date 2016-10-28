@@ -21,7 +21,7 @@ function Util.clone (t) -- deep-copy a table
     return target
 end
 
-function Util.print_r ( t ) 
+function Util.print_r ( t )
     local print_r_cache={}
     local function sub_print_r(t,indent)
         if (print_r_cache[tostring(t)]) then
@@ -45,5 +45,7 @@ function Util.print_r ( t )
     end
     sub_print_r(t,"  ")
 end
+
+function Util.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 
 return Util

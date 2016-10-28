@@ -89,29 +89,41 @@ function GameMap:draw()
   local visible_tile_y = math.ceil((camera.y - love.graphics.getHeight() / 2 / camera.scale))
   local visible_tile_width = math.ceil(love.graphics.getWidth() / camera.scale)
   local visible_tile_height = math.ceil(love.graphics.getHeight() / camera.scale)
-  gridSize = 100
+  gridSize = 20 -- if less than 20, strange behavior may occur.
   variance = 0.4
   points = {}
   triangles = {}
   numTilesRow = math.ceil((visible_tile_x + visible_tile_width + gridSize * 2) / gridSize) - math.ceil((visible_tile_x - gridSize * 2) / gridSize)
   numTilesCol = math.ceil((visible_tile_y + visible_tile_height + gridSize * 2) / gridSize) - math.ceil((visible_tile_y - gridSize * 2) / gridSize)
-  for n = math.ceil((visible_tile_x - gridSize * 2) / gridSize),  math.ceil((visible_tile_x + visible_tile_width + gridSize * 2) / gridSize) do
-    for m = math.ceil((visible_tile_y - gridSize * 2) / gridSize),  math.ceil((visible_tile_y + visible_tile_height + gridSize * 2) / gridSize) do
+
+  --pointy things
+  for m = math.ceil((visible_tile_y - gridSize * 3) / gridSize),  math.ceil((visible_tile_y + visible_tile_width + gridSize * 3) / gridSize) do
+    for n = math.ceil((visible_tile_x - gridSize * 3) / gridSize),  math.ceil((visible_tile_x + visible_tile_height + gridSize * 3) / gridSize) do
       table.insert(points, {n * gridSize + (m % 2) * gridSize / 2, m * gridSize})
     end
   end
   local sizeX = visible_tile_width
   local sizeY = visible_tile_height
 
-  math.randomseed(1)
-  for n = 1, #points - numTilesCol - 1 do
-    --love.graphics.setColor(math.random() * 255, math.random() * 255, math.random() * 255)
-    if math.abs(points[n][2] - points[n+1][2]) > 699 then
-      print((n) % math.ceil(n / numTilesRow + 2) )
+  -- math.randomseed(1)
+
+  fixer = 0
+
+  for f = -3, 3 do
+    if points[3 + numTilesRow + f][1] > points[3][1] and points[3 + numTilesRow + f][1] < points[4][1] then
+      fixer = f
     end
-    if (n) % math.ceil(n / numTilesCol + 2) ~= 0 then
-      table.insert(triangles, {points[n][1], points[n][2], points[n+1][1], points[n+1][2],points[n + numTilesCol + 1][1], points[n + numTilesCol + 1][2]})
-  --0    table.insert(triangles, {points[n+1][1], points[n+1][2], points[n + numTilesCol + 2][1], points[n + numTilesCol + 2][2],points[n + numTilesCol + 1][1], points[n + numTilesCol + 1][2]})
+  end
+
+  for n = 1, #points - numTilesRow - 2 do
+    if math.abs(points[n][1]-points[n+1][1]) <= gridSize and
+       math.abs(points[n+1][1]-points[n + numTilesRow + fixer][1]) <= 2 * gridSize then
+
+      if math.floor((n)/(numTilesRow -2) % 2) ~= 1 then
+        table.insert(triangles, {points[n][1], points[n][2], points[n+1][1], points[n+1][2],points[n + numTilesRow + fixer][1], points[n + numTilesRow + fixer][2]})
+      else
+        table.insert(triangles, {points[n][1], points[n][2], points[n+1][1], points[n+1][2],points[n + numTilesRow + fixer + 1][1], points[n + numTilesRow + fixer + 1][2]})
+      end
     end
   end
 
