@@ -89,24 +89,26 @@ function GameMap:draw()
   local visible_tile_y = math.ceil((camera.y - love.graphics.getHeight() / 2 / camera.scale))
   local visible_tile_width = math.ceil(love.graphics.getWidth() / camera.scale)
   local visible_tile_height = math.ceil(love.graphics.getHeight() / camera.scale)
+
   gridSize = 20 -- if less than 20, strange behavior may occur.
   variance = 0.4
   points = {}
   triangles = {}
-  numTilesRow = math.ceil((visible_tile_x + visible_tile_width + gridSize * 2) / gridSize) - math.ceil((visible_tile_x - gridSize * 2) / gridSize)
-  numTilesCol = math.ceil((visible_tile_y + visible_tile_height + gridSize * 2) / gridSize) - math.ceil((visible_tile_y - gridSize * 2) / gridSize)
+  numTilesRow = visible_tile_width / gridSize + 5
+  numTilesCol = visible_tile_height / gridSize + 5
+
+  local startPosY = math.ceil(visible_tile_y / gridSize) - 2
 
   --pointy things
   math.randomseed(gridSize * 100/variance)
-  for m = math.ceil((visible_tile_y - gridSize * 3) / gridSize),  math.ceil((visible_tile_y + visible_tile_width + gridSize * 3) / gridSize) do
-    for n = math.ceil((visible_tile_x - gridSize * 3) / gridSize),  math.ceil((visible_tile_x + visible_tile_height + gridSize * 3) / gridSize) do
-      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 , m * gridSize})
+  for m = startPosY,  math.ceil((visible_tile_y + visible_tile_height) / gridSize) + 2 do
+    for n = math.ceil(visible_tile_x / gridSize) - 2,  math.ceil((visible_tile_x + visible_tile_width) / gridSize) + 2 do
+      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2, m * gridSize})
     end
   end
+  print(math.ceil(visible_tile_y / gridSize) - 2, numTilesCol)
   local sizeX = visible_tile_width
   local sizeY = visible_tile_height
-
-  -- math.randomseed(1)
 
   fixer = 0
 
@@ -116,26 +118,26 @@ function GameMap:draw()
     end
   end
 
-  for n = 1, #points - numTilesRow - 2 do
-    if math.abs(points[n][1]-points[n+1][1]) <= gridSize and
-       math.abs(points[n+1][1]-points[n + numTilesRow + fixer][1]) <= 2 * gridSize then
-
-      if math.floor((n)/(numTilesRow -2) % 2) ~= 1 then
-        table.insert(triangles, {points[n][1], points[n][2], points[n+1][1], points[n+1][2],points[n + numTilesRow + fixer][1], points[n + numTilesRow + fixer][2]})
-      else
-        table.insert(triangles, {points[n][1], points[n][2], points[n+1][1], points[n+1][2],points[n + numTilesRow + fixer + 1][1], points[n + numTilesRow + fixer + 1][2]})
-      end
+  for n = 1, #points do
+    if n < #points - numTilesRow and n % numTilesRow ~= 0 then
+      tile_offset = (math.ceil(n / numTilesRow) % 2) + ((startPosY + 1) % 2)
+      if tile_offset == 2 then tile_offset = 0 end
+      table.insert(triangles, {points[n][1], points[n][2], points[n + 1][1], points[n + 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow + tile_offset][2]})
     end
   end
-
-  for _, point in pairs(points) do
-    love.graphics.points(point)
-  end
-  -- Util.print_r({{'test'}})
 
   for _, triangle in pairs(triangles) do
     love.graphics.polygon('fill', triangle)
   end
+
+
+  for _, point in pairs(points) do
+    love.graphics.points(point)
+    love.graphics.setColor(255, 0, 0)
+    love.graphics.print(_, point[1], point[2])
+    love.graphics.setColor(255, 255, 255)
+  end
+  -- Util.print_r({{'test'}})
 
   --
   -- for n=1, 32 / gridSize do
