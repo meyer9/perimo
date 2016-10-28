@@ -65,7 +65,6 @@ function Multiplayer:received(cmd, parms)
 end
 
 function Multiplayer:newUser(user)
-  print(user.id, self.client.clientID)
   if user.id ~= self.client.clientID then
     self.superentity.multiplayer_players:playerJoin(user)
   end

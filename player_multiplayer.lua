@@ -23,7 +23,6 @@ function PlayerMP:runCommand(command, parms)
 end
 
 function PlayerMP:mpTick()
-  print(self.player_data.customData.x)
   if self.player_data.customData.x ~= nil then
     self.x = self.player_data.customData.x
   end

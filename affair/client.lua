@@ -221,14 +221,12 @@ function Client:received( command, msg, udp )
 		--self.conn:settimeout(5)
 	elseif command == CMD.USER_VALUE then
 		local id, keyType, key, valueType, value = string.match( msg, "(.*)|(.*)|(.*)|(.*)|(.*)" )
-
 		key = stringToType( key, keyType )
 		value = stringToType( value, valueType )
 
 		id = tonumber( id )
 
 		userList[id].customData[key] = value
-		print(msg)
 
 		if self.callbacks.customDataChanged then
 			self.callback.customDataChanged( user, value, key )

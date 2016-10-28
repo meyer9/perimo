@@ -5,6 +5,8 @@ local socket = require("socket")
 
 local User = require( BASE .. "user" )
 local CMD = require( BASE .. "commands" )
+package.path = package.path .. ";../?.lua"
+local Util = require('util')
 
 --local advertiseLAN = require( BASE_SLASH .. "serverlist/advertiseLAN" )
 
@@ -63,11 +65,19 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	o.port = port
 	o.portUDP = portUDP or port + 1
 	o.advertisement = {}
+	o.bitsInLastSecond = 0
+	o.secondsLeft = 1
 
 	return o
 end
 
 function Server:update( dt )
+	self.secondsLeft = self.secondsLeft - dt
+	if self.secondsLeft <= 0 then
+		print("Packets per second: " .. self.bitsInLastSecond)
+		self.bitsInLastSecond = 0
+		self.secondsLeft = 1
+	end
 	if self.conn then
 
 		local newConnection = self.conn:accept()
@@ -161,9 +171,11 @@ function Server:update( dt )
 	end
 	-- print(self.conn, self.connUDP)
 	if self.connUDP then
+		-- Util.print_r(authKeyAssoc)
 		msg, ip, port = self.connUDP:receivefrom()
 		if msg then
 			authKey, command, content = string.match( msg, "(%d+)|(.)(.*)")
+			self.bitsInLastSecond = self.bitsInLastSecond + 1
 			command = string.byte( command )
 			id = authKeyAssoc[tonumber(authKey)]
 			u = userList[id]
@@ -293,13 +305,14 @@ end
 function Server:send( command, msg, user, udp )
 	udp = udp or false
 	-- Send to only one user:
-	if udp and (not user or user.port and user.ip) then
+	if udp and (not user or (user.port and user.ip)) then
 		local fullMsg = string.char(command) .. (msg or "") --.. "\n"
 		if user then
 			self.connUDP:sendto(fullMsg, user.ip, user.port)
 		else
 			for k, u in pairs( userList ) do
 				if u.port and u.ip then
+					-- print("send to all:", u.ip, u.port)
 					self.connUDP:sendto( fullMsg, u.ip, u.port )
 				end
 			end

@@ -106,10 +106,8 @@ function GameMap:draw()
       table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 + math.random() * variance, m * gridSize + math.random() * variance})
     end
   end
-  print(math.ceil(visible_tile_y / gridSize) - 2, numTilesCol)
   local sizeX = visible_tile_width
   local sizeY = visible_tile_height
-  print(numTilesRow)
   for n = 1, #points do
     if n < #points - numTilesRow and n % numTilesRow ~= 0  and n % numTilesRow ~= 1 then
       tile_offset = (math.ceil(n / numTilesRow) % 2) + ((startPosY + 1) % 2)

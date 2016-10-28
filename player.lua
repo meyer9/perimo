@@ -74,8 +74,8 @@ function Player:update(dt)
 end
 
 function Player:mpTick()
-  -- self.game.multiplayer.client:setUserValue("x", self.x)
-  -- self.game.multiplayer.client:setUserValue("y", self.y)
+  self.game.multiplayer.client:setUserValue("x", self.x, true)
+  self.game.multiplayer.client:setUserValue("y", self.y, true)
 end
 
 function Player:draw()

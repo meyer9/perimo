@@ -89,7 +89,7 @@ function Server:update()
 
 	-- This is important. Play with this value to fit your need.
 	-- If you don't use this sleep command, the CPU will be used as much as possible, you'll probably run the game loop WAY more often than on the clients (who also require time to render the picture - something you don't need)
-	socket.sleep( 0.05 )
+	-- socket.sleep( 0.0001 )
 end
 
 return Server
