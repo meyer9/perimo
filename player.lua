@@ -32,7 +32,7 @@ function Player:load()
   self.dx = 0 -- how much moved in frame
   self.dy = 0
   self.legSmooth = 0
-  self.reload = 100
+  self.reload = 1000
   self.toReload = self.reload
   self.playerFont = love.graphics.newFont(10)
 end
@@ -74,8 +74,8 @@ function Player:update(dt)
 end
 
 function Player:mpTick()
-  self.game.multiplayer.client:setUserValue("x", self.x, true)
-  self.game.multiplayer.client:setUserValue("y", self.y, true)
+  -- self.game.multiplayer.client:setUserValue("x", self.x)
+  -- self.game.multiplayer.client:setUserValue("y", self.y)
 end
 
 function Player:draw()
