@@ -10,9 +10,11 @@ local network = require('affair.network')
 local class = require('middleclass')
 local uuid = require('uuid')
 local socket = require('socket')
+local util = require('util')
 
 local COMMANDS = require('common.commands')
 local Map = require('common.map')
+local Gamestate = require('common.gamestate')
 
 local Server = class('Server')
 
@@ -46,10 +48,16 @@ function Server:initialize()
   function callSync(...)
     return self:synchronize(...)
   end
-  self.server.callbacks.received = serverReceive
+
+  function callUserFullyConnected(...)
+    return self:userFullyConnected(...)
+  end
+
+  self.server.callbacks.received = callHandle
   self.server.callbacks.authorize = callAuth
   self.server.callbacks.synchronize = callSync
   self.server.callbacks.customDataChanged = newUserData
+  self.server.callbacks.userFullyConnected = callUserFullyConnected
 
   if not self.server then
     print('Server creation failed.')
@@ -65,15 +73,49 @@ function Server:initialize()
   self.map:generate_island()
   print("Finished.")
 
-  self.time = socket.gettime()
   self.dt = 0
+  self.time = socket.gettime()
+
+  self.total_time = 0
+  self.tick = 0
+  self.tickrate = 16
+
+  self.lastGamestate = nil
+  self.currentGamestate = Gamestate:new()
+end
+
+function Server:userFullyConnected(user)
+  local player_uuid = self.currentGamestate:addObject()
+  self.server:setUserValue(user, 'player_uuid', player_uuid)
+  self.currentGamestate:updateState(player_uuid, "x", 0)
+  self.currentGamestate:updateState(player_uuid, "y", 0)
+  local serialized_state = self.currentGamestate:serialize()
+  self.server:send(COMMANDS.full_update, serialized_state)
 end
 
 function Server:auth(user, authMsg)
   return true
 end
 
-function Server:handle_message(cmd, parms)
+function Server:handle_message(cmd, parms, user)
+  local player_uuid = user.customData.player_uuid
+  local dt = 1 / self.tickrate
+  if player_uuid then
+    if cmd == COMMANDS.forward then
+      local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
+      self.currentGamestate:updateState(player_uuid, "y", currentY - 100 * dt)
+    elseif cmd == COMMANDS.backward then
+      local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
+      self.currentGamestate:updateState(player_uuid, "y", currentY + 100 * dt)
+    end
+    if cmd == COMMANDS.left then
+      local currentX = self.currentGamestate:getObjectProp(player_uuid, "x")
+      self.currentGamestate:updateState(player_uuid, "x", currentX - 100 * dt)
+    elseif cmd == COMMANDS.right then
+      local currentX = self.currentGamestate:getObjectProp(player_uuid, "x")
+      self.currentGamestate:updateState(player_uuid, "x", currentX + 100 * dt)
+    end
+  end
 end
 
 function Server:synchronize(user)
@@ -84,6 +126,13 @@ end
 function Server:update()
   self.server:update(self.dt)
 
+  self.total_time = self.total_time + self.dt
+  if self.total_time - (self.tick / self.tickrate) > 1 / self.tickrate then
+    self.tick = self.tick + 1
+    self.start_tick = socket.gettime()
+    self:mpTick()
+  end
+
 	self.dt = socket.gettime() - self.time
 	self.time = socket.gettime()
 
@@ -92,4 +141,23 @@ function Server:update()
 	-- socket.sleep( 0.0001 )
 end
 
+function Server:mpTick()
+
+  local users = self.server:getUsers()
+
+  if users[1] and users[1].customData and users[1].customData.player_uuid then
+    local player_uuid = users[1].customData.player_uuid
+    local currentPlayerPos = self.currentGamestate:getObjectProp(player_uuid, "pos") or 0
+    self.currentGamestate:updateState(player_uuid, "pos", currentPlayerPos + 1)
+  end
+
+  if self.lastGamestate then
+    local delta = self.currentGamestate:deltaSerialize(self.lastGamestate)
+    self.server:send(COMMANDS.delta_update, delta, false, true) -- send udp packets to all users with delta gamestate
+  else -- server doesn't have last ticks gamestate so send a full update to all clients
+    local serialized_state = self.currentGamestate:serialize()
+    self.server:send(COMMANDS.full_update, serialized_state, false, true)
+  end
+  self.lastGamestate = self.currentGamestate:clone()
+end
 return Server

@@ -211,9 +211,10 @@ function Client:received( command, msg, udp )
 		end
 
 	elseif command == CMD.PLAYERNAME then
-		local id, playerName = string.match( msg, "(.*)|(.*)" )
+		local id, playerName, tick = string.match( msg, "(.*)|(.*)|(.*)" )
 		self.playerName = playerName
 		self.clientID = tonumber(id)
+		self.tick = tick
 		-- At this point I am fully connected!
 		if self.callbacks.connected then
 			self.callbacks.connected()
@@ -294,6 +295,7 @@ end
 function Client:getUserValue( key )
 	if not self.clientID then return nil end
 	local u = userList[self.clientID]
+	-- util.print_r(self.clientID)
 	if u then
 		return u.customData[key]
 	end

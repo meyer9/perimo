@@ -9,15 +9,24 @@ local class = require 'middleclass'
 local network = require 'affair.network'
 local Entity = require 'entity'
 local uuid = require 'uuid'
+local util = require 'util'
 local COMMANDS = require('common.commands')
+local Gamestate = require('common.gamestate')
 
 local Multiplayer = class('Multiplayer', Entity)
 
 function Multiplayer:load()
-  self.tick = 0
+  self.start_tick = socket.gettime()
   self.tickrate = self.superentity.tickrate
   self.isConnected = false
   self.total_time = 0
+  self.previous_game_states = {}
+  self.currentGamestate = Gamestate:new()
+  self.max_gamestate_history = 2
+end
+
+function Multiplayer:getFractionalTick()
+  return self.client.tick + ((socket.gettime() - self.start_tick) / 1000000)
 end
 
 function Multiplayer:connect(host, port)
@@ -46,9 +55,15 @@ function Multiplayer:connect(host, port)
   self.client.callbacks.newUser = callNewUser
 end
 
+function Multiplayer:sendCommand(command, parms, udp)
+  if not udp then udp = false end
+  self.client:send(COMMANDS[command], parms, udp)
+end
+
 function Multiplayer:connected()
   print('Connected to server.')
   self.isConnected = true
+  self.client:send(COMMANDS.handshake, nil, true)
 end
 
 function Multiplayer:received(cmd, parms)
@@ -56,12 +71,20 @@ function Multiplayer:received(cmd, parms)
     print("Loaded map...")
     self.superentity.map:deserialize(parms)
   end
-  -- not needed unless attribute is not covered by synchronization
-
-  -- if cmd == COMMANDS['player_at'] then
-  --   local player_id, x, y = parms:match("(%d+),(%d+),(%d+)")
-  --   self.superentity.multiplayer_players:runCommand(player_id, cmd, {x=x, y=y})
-  -- end
+  if cmd == COMMANDS.full_update then
+    table.insert(self.previous_game_states, self.currentGamestate:clone())
+    if #self.previous_game_states > self.max_gamestate_history then
+      table.remove(self.previous_game_states, 1)
+    end
+    self.currentGamestate:deserialize(parms)
+  end
+  if cmd == COMMANDS.delta_update then
+    table.insert(self.previous_game_states, self.currentGamestate:clone())
+    if #self.previous_game_states > self.max_gamestate_history then
+      table.remove(self.previous_game_states, 1)
+    end
+    self.currentGamestate:deserializeDeltaAndUpdate(parms)
+  end
 end
 
 function Multiplayer:newUser(user)
@@ -73,8 +96,10 @@ end
 function Multiplayer:update(dt)
   self.total_time = self.total_time + dt
   if self.isConnected then
-    if self.total_time - (self.tick / self.tickrate) > 1 / self.tickrate then
-      self.tick = self.tick + 1
+    if self.total_time - (self.client.tick / self.tickrate) > 1 / self.tickrate then
+      self.client.tick = self.client.tick + 1
+      self.start_tick = socket.gettime()
+      -- util.print_r(self.currentGamestate._state)
       self.superentity:call_mpTick()
     end
   end

@@ -6,6 +6,7 @@
 
 local class = require 'middleclass'
 local Player = require 'player'
+local Timeframe = require 'common.timeframe'
 local COMMANDS = require 'common.commands'
 
 local PlayerMP = class('PlayerMP', Player)
@@ -13,6 +14,8 @@ local PlayerMP = class('PlayerMP', Player)
 function PlayerMP:initialize(player)
   Player.initialize(self, false, player.playerName)
   self.player_data = player
+  self.timeframe_x = Timeframe:new(10)
+  self.timeframe_y = Timeframe:new(10)
 end
 
 function PlayerMP:runCommand(command, parms)
@@ -23,11 +26,5 @@ function PlayerMP:runCommand(command, parms)
 end
 
 function PlayerMP:mpTick()
-  if self.player_data.customData.x ~= nil then
-    self.x = self.player_data.customData.x
-  end
-  if self.player_data.customData.y ~= nil then
-    self.y = self.player_data.customData.y
-  end
 end
 return PlayerMP

@@ -67,11 +67,20 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	o.advertisement = {}
 	o.bitsInLastSecond = 0
 	o.secondsLeft = 1
+	o.tick = 0
+	o.tickrate = 16
+	o.time = 0
 
 	return o
 end
 
 function Server:update( dt )
+
+	self.time = self.time + dt
+	if self.time > self.tick / self.tickrate then
+		self.tick = self.tick + 1
+	end
+
 	self.secondsLeft = self.secondsLeft - dt
 	if self.secondsLeft <= 0 then
 		print("Packets per second: " .. self.bitsInLastSecond)
@@ -232,7 +241,7 @@ function Server:received( command, msg, user, udp )
 
 		-- Let user know about the (possibly corrected) username and his
 		-- client id:
-		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName, user, udp )
+		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName .. "|" .. self.tick, user, udp )
 
 		-- Let all users know about the new user...
 		self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName, nil, udp )
@@ -259,7 +268,17 @@ function Server:received( command, msg, user, udp )
 		if self.callbacks.customDataChanged then
 			self.callbacks.customDataChanged( user, value, key, prevValue )
 		end
+	elseif command == 255 and udp then
+		if self.callbacks.synchronize then
+			self.callbacks.synchronize( user )
+		end
 
+		user.synchronized = true
+
+		-- Let the program know that this user is now considered fully synchronized
+		if self.callbacks.userFullyConnected then
+			self.callbacks.userFullyConnected( user )
+		end
 	elseif self.callbacks.received then
 		-- If the command is not known by the engine, then send it on to the above layer:
 		self.callbacks.received( command, msg, user )
@@ -286,17 +305,6 @@ function Server:synchronizeUser( user )
 
 	-- Send this new user to the user as well (let him know about himself)
 	self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName, user )
-
-	if self.callbacks.synchronize then
-		self.callbacks.synchronize( user )
-	end
-
-	user.synchronized = true
-
-	-- Let the program know that this user is now considered fully synchronized
-	if self.callbacks.userFullyConnected then
-		self.callbacks.userFullyConnected( user )
-	end
 
 	print("[NET] New Client! (" .. numberOfUsers .. ")" )
 end

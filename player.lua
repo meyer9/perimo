@@ -11,6 +11,7 @@ local class = require 'middleclass'
 local Entity = require 'entity'
 local Animation = require 'animation'
 local Bullet = require 'bullet'
+local util = require 'util'
 
 local Player = class('Player', Entity)
 
@@ -24,7 +25,6 @@ function Player:load()
   self.torsoAnimation = Animation:new('player.png', 16, 16, 4, 0.3)
   self.legAnimation = Animation:new('legs_anim.png', 16, 16, 9, 0.07)
 
-  if not controllable then controllable = false end
   self.anim_index = 0
   self.x = 4000
   self.y = 4000
@@ -37,45 +37,28 @@ function Player:load()
   self.playerFont = love.graphics.newFont(10)
 end
 
-function Player:update(dt)
-  if self.controllable then
-    self.dx = 0
-    self.dy = 0
-    if love.keyboard.isDown("w") then
-      self.dy = -self.speed * dt
-    elseif love.keyboard.isDown("s") then
-      self.dy = self.speed * dt
-    end
-    if love.keyboard.isDown("a") then
-      self.dx = -self.speed * dt
-    elseif love.keyboard.isDown("d") then
-      self.dx = self.speed * dt
-    end
-
-    self.y = self.y + self.dy
-    self.x = self.x + self.dx
-
-    if love.keyboard.isDown("w") or love.keyboard.isDown("a") or love.keyboard.isDown("s") or love.keyboard.isDown("d") then
-      self.torsoAnimation:update(dt)
-      self.legAnimation:update(dt)
-    else
-      self.torsoAnimation:resetAnimation(1)
-      self.legAnimation:resetAnimation()
-    end
-    self.toReload = self.toReload - 1
-    if love.mouse.isDown(1) and self.toReload < 0 then
-      self.toReload = self.reload
-      local mousePositionX, mousePositionY = self.superentity.camera:mousePosition()
-      local bullet = Bullet:new(self.x, self.y)
-      self:addSubentity(bullet)
-      bullet:shoot(mousePositionX - self.x, mousePositionY - self.y)
-    end
+function Player:update()
+  if self.game.multiplayer.isConnected and self.game.multiplayer.currentGamestate.updated and self.controllable then
+    local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
+    self.x = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "x")
+    self.y = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "y")
   end
 end
 
 function Player:mpTick()
-  self.game.multiplayer.client:setUserValue("x", self.x, true)
-  self.game.multiplayer.client:setUserValue("y", self.y, true)
+  local dt = 1 / self.game.tickrate
+  if self.controllable then
+    if love.keyboard.isDown("w") then
+      self.game.multiplayer:sendCommand("forward", nil, true)
+    elseif love.keyboard.isDown("s") then
+      self.game.multiplayer:sendCommand("backward", nil, true)
+    end
+    if love.keyboard.isDown("a") then
+      self.game.multiplayer:sendCommand("left", nil, true)
+    elseif love.keyboard.isDown("d") then
+      self.game.multiplayer:sendCommand("right", nil, true)
+    end
+  end
 end
 
 function Player:draw()
