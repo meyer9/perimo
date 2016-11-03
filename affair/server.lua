@@ -52,6 +52,7 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 		authorize = nil,
 		customDataChanged = nil,
 		userFullyConnected = nil,
+		tick = nil
 	}
 
 	userList = {}
@@ -68,17 +69,17 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	o.bitsInLastSecond = 0
 	o.secondsLeft = 1
 	o.tick = 0
-	o.tickrate = 16
+	o.tickrate = 1
 	o.time = 0
 
 	return o
 end
 
 function Server:update( dt )
-
 	self.time = self.time + dt
 	if self.time > self.tick / self.tickrate then
 		self.tick = self.tick + 1
+		self.callbacks.tick(self.tick)
 	end
 
 	self.secondsLeft = self.secondsLeft - dt
@@ -198,6 +199,7 @@ function Server:update( dt )
 	end
 	return false
 end
+
 
 function Server:received( command, msg, user, udp )
 	udp = udp or false

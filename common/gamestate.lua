@@ -13,8 +13,8 @@ local messagepack = require('msgpack.MessagePack')
 
 local Gamestate = class('Gamestate')
 
-function Gamestate:initialize()
-  self._state = {}
+function Gamestate:initialize(tick)
+  self._state = {server = {tick = 0}}
   self.updated = false
 end
 
@@ -68,6 +68,8 @@ function Gamestate:deltaUpdate(delta)
 end
 
 function Gamestate:updateState(objectID, prop, state)
+  -- print(objectID, prop, state)
+  if not self._state[objectID] then self._state[objectID] = {} end
   self._state[objectID][prop] = state
 end
 

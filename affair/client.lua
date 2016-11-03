@@ -212,7 +212,7 @@ function Client:received( command, msg, udp )
 
 	elseif command == CMD.PLAYERNAME then
 		local id, playerName, tick = string.match( msg, "(.*)|(.*)|(.*)" )
-		print(id, playerName, tick)
+		-- print(id, playerName, tick)
 		self.playerName = playerName
 		self.clientID = tonumber(id)
 		self.tick = tick

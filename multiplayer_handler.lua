@@ -12,21 +12,20 @@ local uuid = require 'uuid'
 local util = require 'util'
 local COMMANDS = require('common.commands')
 local Gamestate = require('common.gamestate')
+local GamestateHistory = require 'common.gamestate_history'
+local messagepack = require('msgpack.MessagePack')
 
 local Multiplayer = class('Multiplayer', Entity)
 
 function Multiplayer:load()
-  self.start_tick = socket.gettime()
   self.tickrate = self.superentity.tickrate
   self.isConnected = false
-  self.time_until_next_tick = 0
-  self.previous_game_states = {}
+  self.gamestate_history = GamestateHistory:new()
   self.currentGamestate = Gamestate:new()
-  self.max_gamestate_history = 2
-end
-
-function Multiplayer:getFractionalTick()
-  return self.client.tick + ((socket.gettime() - self.start_tick) / 1000000)
+  self.tick = 0
+  self.time_since_dt = socket.gettime()
+  self.last_tick = 0
+  self.needs_update = {}
 end
 
 function Multiplayer:connect(host, port)
@@ -72,38 +71,39 @@ function Multiplayer:received(cmd, parms)
     self.superentity.map:deserialize(parms)
   end
   if cmd == COMMANDS.full_update then
-    table.insert(self.previous_game_states, self.currentGamestate:clone())
-    if #self.previous_game_states > self.max_gamestate_history then
-      table.remove(self.previous_game_states, 1)
-    end
+    self.gamestate_history:newFrame(self.currentGamestate:clone())
     self.currentGamestate:deserialize(parms)
+    local tick = self.currentGamestate:getObjectProp('server', 'tick')
+    for entity_id, _ in pairs(messagepack.unpack(parms)) do
+      table.insert(self.needs_update, entity_id)
+      print(entity_id)
+    end
+    -- print(tick)
+    if tick then self.tick = tick - 2 end
   end
   if cmd == COMMANDS.delta_update then
-    table.insert(self.previous_game_states, self.currentGamestate:clone())
-    if #self.previous_game_states > self.max_gamestate_history then
-      table.remove(self.previous_game_states, 1)
-    end
+    self.gamestate_history:newFrame(self.currentGamestate:clone())
     self.currentGamestate:deserializeDeltaAndUpdate(parms)
-    -- util.print_r(self.currentGamestate._state)
+    local tick = self.currentGamestate:getObjectProp('server', 'tick')
+    for entity_id, _ in pairs(messagepack.unpack(parms)) do
+      table.insert(self.needs_update, entity_id)
+    end
+    if tick then self.tick = tick - 2 end
   end
 end
 
 function Multiplayer:newUser(user)
-  -- if user.id ~= self.client.clientID then
-  --   self.superentity.multiplayer_players:playerJoin(user)
-  -- end
 end
 
 function Multiplayer:update(dt)
-  self.time_until_next_tick = self.time_until_next_tick - dt
-  if self.isConnected then
-    if self.time_until_next_tick <= 0 then
-      self.client.tick = self.client.tick + 1
-      self.start_tick = socket.gettime()
-      self.time_until_next_tick = 1 / self.tickrate
-      -- util.print_r(self.currentGamestate._state)
-      self.game:call_mpTick()
-    end
+  local dt = socket.gettime() - self.time_since_dt
+  self.time_since_dt = socket.gettime()
+  self.tick = self.tick + (dt * self.tickrate)
+  if self.last_tick ~= math.floor(self.tick) then
+    self.last_tick = math.floor(self.tick)
+    print('tick')
+    self.needs_update = {}
+    self.game:call_mpTick()
   end
   self.client:update(dt)
 end

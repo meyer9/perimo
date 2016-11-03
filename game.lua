@@ -23,7 +23,7 @@ function Game:initialize()
   love.graphics.setDefaultFilter('nearest', 'nearest')
   -- love.window.setMode(1280, 800, {msaa = 32, fullscreen = true})
 
-  self.tickrate = 100
+  self.tickrate = 3
 
   self.map = GameMap:new()
   self:addSubentity(self.map)
@@ -50,8 +50,9 @@ end
 --   table.insert(self.players
 -- end
 
-function Game:update(dt)
-  self.multiplayer:update(dt)
+function Game:call_update(dt)
+  -- self.multiplayer:update(dt)
+  Entity.call_update(self, dt)
   local smoother = Camera.smooth.damped(4)
   if self.player.x < love.graphics.getWidth() / 4 then
     self.camera:lockX(love.graphics.getWidth() / 4, smoother)

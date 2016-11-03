@@ -26,8 +26,8 @@ function Player:load()
   self.legAnimation = Animation:new('legs_anim.png', 16, 16, 9, 0.07)
 
   self.anim_index = 0
-  self.x = 4000
-  self.y = 4000
+  self.x = 0
+  self.y = 0
   self.speed = 100
   self.dx = 0 -- how much moved in frame
   self.dy = 0
@@ -37,11 +37,24 @@ function Player:load()
   self.playerFont = love.graphics.newFont(10)
 end
 
-function Player:update()
-  if self.game.multiplayer.isConnected and self.game.multiplayer.currentGamestate.updated and self.controllable then
-    local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
-    self.x = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "x")
-    self.y = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "y")
+function Player:update(dt)
+  local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
+  if self.game.multiplayer.isConnected and self.game.multiplayer.currentGamestate.updated and self.controllable and util.has_value(self.game.multiplayer.needs_update, playerUUID) then
+    if not alreadyUpdated then
+      util.remove_value(self.game.multiplayer.needs_update, playerUUID)
+      self.x = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "x")
+      self.y = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "y")
+    end
+  end
+  if love.keyboard.isDown("w") then
+    self.y = self.y - dt * 100
+  elseif love.keyboard.isDown("s") then
+    self.y = self.y + dt * 100
+  end
+  if love.keyboard.isDown("a") then
+    self.x = self.x - dt * 100
+  elseif love.keyboard.isDown("d") then
+    self.x = self.x + dt * 100
   end
 end
 

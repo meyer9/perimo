@@ -53,11 +53,16 @@ function Server:initialize()
     return self:userFullyConnected(...)
   end
 
+  function callTick(...)
+    return self:mpTick(...)
+  end
+
   self.server.callbacks.received = callHandle
   self.server.callbacks.authorize = callAuth
   self.server.callbacks.synchronize = callSync
   self.server.callbacks.customDataChanged = newUserData
   self.server.callbacks.userFullyConnected = callUserFullyConnected
+  self.server.callbacks.tick = callTick
 
   if not self.server then
     print('Server creation failed.')
@@ -75,13 +80,10 @@ function Server:initialize()
 
   self.dt = 0
   self.time = socket.gettime()
-
-  self.total_time = 0
-  self.tick = 0
-  self.tickrate = 100
+  self.server.tickrate = 3
 
   self.lastGamestate = nil
-  self.currentGamestate = Gamestate:new()
+  self.currentGamestate = Gamestate:new(self.tick)
 end
 
 function Server:userFullyConnected(user)
@@ -99,8 +101,9 @@ end
 
 function Server:handle_message(cmd, parms, user)
   local player_uuid = user.customData.player_uuid
-  local dt = 1 / self.tickrate
+  local dt = 1 / self.server.tickrate
   if player_uuid then
+    print(cmd, parms)
     if cmd == COMMANDS.forward then
       local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
       self.currentGamestate:updateState(player_uuid, "y", currentY - 100 * dt)
@@ -126,13 +129,6 @@ end
 function Server:update()
   self.server:update(self.dt)
 
-  self.total_time = self.total_time + self.dt
-  if self.total_time - (self.tick / self.tickrate) > 1 / self.tickrate then
-    self.tick = self.tick + 1
-    self.start_tick = socket.gettime()
-    self:mpTick()
-  end
-
 	self.dt = socket.gettime() - self.time
 	self.time = socket.gettime()
 
@@ -141,15 +137,9 @@ function Server:update()
 	-- socket.sleep( 0.0001 )
 end
 
-function Server:mpTick()
-
+function Server:mpTick(tick)
+  self.currentGamestate:updateState('server', 'tick', tick)
   local users = self.server:getUsers()
-
-  if users[1] and users[1].customData and users[1].customData.player_uuid then
-    local player_uuid = users[1].customData.player_uuid
-    local currentPlayerPos = self.currentGamestate:getObjectProp(player_uuid, "pos") or 0
-    self.currentGamestate:updateState(player_uuid, "pos", currentPlayerPos + 1)
-  end
 
   if self.lastGamestate then
     local delta = self.currentGamestate:deltaSerialize(self.lastGamestate)

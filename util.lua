@@ -48,4 +48,24 @@ end
 
 function Util.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 
+function Util.has_value (tab, val)
+    for index, value in ipairs (tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Util.remove_value (tab, val)
+    for index, value in ipairs (tab) do
+        if value == val then
+            table.remove(tab, index)
+        end
+    end
+
+    return false
+end
+
 return Util
