@@ -19,7 +19,7 @@ function Multiplayer:load()
   self.start_tick = socket.gettime()
   self.tickrate = self.superentity.tickrate
   self.isConnected = false
-  self.total_time = 0
+  self.time_until_next_tick = 0
   self.previous_game_states = {}
   self.currentGamestate = Gamestate:new()
   self.max_gamestate_history = 2
@@ -84,23 +84,25 @@ function Multiplayer:received(cmd, parms)
       table.remove(self.previous_game_states, 1)
     end
     self.currentGamestate:deserializeDeltaAndUpdate(parms)
+    -- util.print_r(self.currentGamestate._state)
   end
 end
 
 function Multiplayer:newUser(user)
-  if user.id ~= self.client.clientID then
-    self.superentity.multiplayer_players:playerJoin(user)
-  end
+  -- if user.id ~= self.client.clientID then
+  --   self.superentity.multiplayer_players:playerJoin(user)
+  -- end
 end
 
 function Multiplayer:update(dt)
-  self.total_time = self.total_time + dt
+  self.time_until_next_tick = self.time_until_next_tick - dt
   if self.isConnected then
-    if self.total_time - (self.client.tick / self.tickrate) > 1 / self.tickrate then
+    if self.time_until_next_tick <= 0 then
       self.client.tick = self.client.tick + 1
       self.start_tick = socket.gettime()
+      self.time_until_next_tick = 1 / self.tickrate
       -- util.print_r(self.currentGamestate._state)
-      self.superentity:call_mpTick()
+      self.game:call_mpTick()
     end
   end
   self.client:update(dt)

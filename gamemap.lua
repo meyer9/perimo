@@ -90,20 +90,19 @@ function GameMap:draw()
   local visible_tile_width = math.ceil(love.graphics.getWidth() / camera.scale)
   local visible_tile_height = math.ceil(love.graphics.getHeight() / camera.scale)
 
-  gridSize = 20 -- must be 10 * 2 ^ n
-  variance = 0.4
+  gridSize = 10 -- if less than 20, strange behavior may occur.
+  variance = 0
   points = {}
   triangles = {}
   numTilesRow = visible_tile_width / gridSize + 5
   numTilesCol = visible_tile_height / gridSize + 5
 
   local startPosY = math.ceil(visible_tile_y / gridSize) - 2
-
   --pointy things
-  --math.randomseed(gridSize * 100/variance)
   for m = startPosY,  math.ceil((visible_tile_y + visible_tile_height) / gridSize) + 2 do
     for n = math.ceil(visible_tile_x / gridSize) - 2,  math.ceil((visible_tile_x + visible_tile_width) / gridSize) + 2 do
-      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2+ 2 * gridSize * math.random() * variance - variance, m * gridSize+ 2 * gridSize * math.random() * variance - variance})
+      math.randomseed(m + 1000* n)
+      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 + math.random() * variance, m * gridSize + math.random() * variance})
     end
   end
 
@@ -111,30 +110,38 @@ function GameMap:draw()
     if n < #points - numTilesRow and n % numTilesRow ~= 0  and n % numTilesRow ~= 1 then
       tile_offset = (math.ceil(n / numTilesRow) % 2) + ((startPosY + 1) % 2)
       if tile_offset == 2 then tile_offset = 0 end
-      table.insert(triangles, {points[n][1], points[n][2], points[n + 1][1], points[n + 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow + tile_offset][2]})
-      table.insert(triangles, {points[n][1], points[n][2], points[n + numTilesRow + tile_offset - 1][1], points[n + numTilesRow + tile_offset - 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow+ tile_offset][2]})
+      -- if points[n][1] - points[n + numTilesRow - 1][1] < -400 then
+      --   print(n % numTilesRow)
+      -- end
+      local tri1 = {points[n][1], points[n][2], points[n + 1][1], points[n + 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow + tile_offset][2]}
+      local tri2 = {points[n][1], points[n][2], points[n + numTilesRow + tile_offset - 1][1], points[n + numTilesRow + tile_offset - 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow][2]}
+
+      local tri1_centroid = {(tri1[1] + tri1[3] + tri1[5]) / 3 + visible_tile_x, (tri1[2] + tri1[3] + tri1[4]) / 3 + visible_tile_y}
+      local tri2_centroid = {(tri2[1] + tri2[3] + tri2[5]) / 3 + visible_tile_x, (tri2[2] + tri2[3] + tri2[4]) / 3 + visible_tile_y}
+
+      love.graphics.setColor(0,0,0)
+      if self:get_tile(math.ceil(tri1_centroid[1] / gridSize), math.ceil(tri1_centroid[2] / gridSize)) == Tiles.ID.WATER then
+        love.graphics.setColor(0,0,255)
+      else
+        love.graphics.setColor(0,255,0)
+      end
+      love.graphics.polygon('fill', tri1)
+      love.graphics.polygon('line', tri1)
+      if self:get_tile(math.ceil(tri2_centroid[1] / gridSize), math.ceil(tri2_centroid[2] / gridSize)) == Tiles.ID.WATER then
+        love.graphics.setColor(0,0,255)
+      else
+        love.graphics.setColor(0,255,0)
+      end
+      love.graphics.polygon('fill', tri2)
+      love.graphics.polygon('line', tri2)
+      -- love.graphics.setColor(0,0,0)
+      -- love.graphics.polygon('fill', tri2)
+      -- love.graphics.setColor(255, 255, 255)
+      -- love.graphics.polygon('line', tri2)
     end
   end
-
-math.randomseed(100000*variance/gridSize)
-
-for _, triangle in pairs(triangles) do
-  if self:get_tile(math.ceil((triangle[1] + triangle[3] + triangle[5])/3/gridSize), math.ceil((triangle[2] + triangle[4] + triangle[6])/3/gridSize)) == Tiles.ID.GRASS then
-      love.graphics.setColor(Util.HSL(100, 45 + math.random(-1,1) * 10,57 + math.random(-1,1) * 10))
-      love.graphics.polygon('fill', triangle)
-      love.graphics.polygon('line', triangle)
-  elseif self:get_tile(math.ceil((triangle[1] + triangle[3] + triangle[5])/3/gridSize), math.ceil((triangle[2] + triangle[4] + triangle[6])/3/gridSize)) == Tiles.ID.SAND then
-      love.graphics.setColor(Util.HSL(50, 31 + math.random(-1,1) * 10,77 + math.random(-1,1) * 10))
-      love.graphics.polygon('fill', triangle)
-      love.graphics.polygon('line', triangle)
-  elseif self:get_tile(math.ceil((triangle[1] + triangle[3] + triangle[5])/3/gridSize), math.ceil((triangle[2] + triangle[4] + triangle[6])/3/gridSize)) == Tiles.ID.WATER then
-      love.graphics.setColor(Util.HSL(174, 64 + math.random(-1,1) * 10,71 + math.random(-1,1) * 10))
-      love.graphics.polygon('fill', triangle)
-      love.graphics.polygon('line', triangle)
-  end
+  love.graphics.setColor(255, 255, 255)
 end
-
-love.graphics.setColor(255, 255, 255)
 
 
 
@@ -248,6 +255,5 @@ love.graphics.setColor(255, 255, 255)
   --     end
   --   end
   -- end
-end
 
 return GameMap

@@ -78,7 +78,7 @@ function Server:initialize()
 
   self.total_time = 0
   self.tick = 0
-  self.tickrate = 16
+  self.tickrate = 100
 
   self.lastGamestate = nil
   self.currentGamestate = Gamestate:new()

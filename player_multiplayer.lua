@@ -16,6 +16,7 @@ function PlayerMP:initialize(player)
   self.player_data = player
   self.timeframe_x = Timeframe:new(10)
   self.timeframe_y = Timeframe:new(10)
+  print('a')
 end
 
 function PlayerMP:runCommand(command, parms)
