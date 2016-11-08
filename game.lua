@@ -23,7 +23,7 @@ function Game:initialize()
   love.graphics.setDefaultFilter('nearest', 'nearest')
   -- love.window.setMode(1280, 800, {msaa = 32, fullscreen = true})
 
-  self.tickrate = 2
+  self.tickrate = 16
 
   self.map = GameMap:new()
   self:addSubentity(self.map)

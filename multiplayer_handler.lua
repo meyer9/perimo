@@ -12,6 +12,7 @@ local uuid = require 'uuid'
 local util = require 'util'
 local COMMANDS = require('common.commands')
 local Gamestate = require('common.gamestate')
+local GamestateRunner = require('common.gamestate_runner')
 local messagepack = require('msgpack.MessagePack')
 
 local Multiplayer = class('Multiplayer', Entity)
@@ -24,6 +25,7 @@ function Multiplayer:load()
   self.time_since_dt = socket.gettime()
   self.last_tick = 0
   self.needs_update = {}
+  self.gamestate_runner = GamestateRunner:new(self.game.tickrate)
 end
 
 function Multiplayer:connect(host, port)
@@ -55,6 +57,8 @@ end
 function Multiplayer:sendCommand(command, parms, udp)
   if not udp then udp = false end
   self.client:send(COMMANDS[command], parms, udp)
+  local player_uuid = self.client:getUserValue("player_uuid")
+  self.gamestate_runner:addCommand(player_uuid, COMMANDS[command], self.tick, params)
 end
 
 function Multiplayer:connected()
@@ -73,8 +77,8 @@ function Multiplayer:received(cmd, parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
     for entity_id, _ in pairs(messagepack.unpack(parms)) do
       table.insert(self.needs_update, entity_id)
-      print(entity_id)
     end
+    self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
     -- print(tick)
     if tick then self.tick = tick - 2 end
   end
@@ -84,6 +88,7 @@ function Multiplayer:received(cmd, parms)
     for entity_id, _ in pairs(messagepack.unpack(parms)) do
       table.insert(self.needs_update, entity_id)
     end
+    self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
     if tick then self.tick = tick - 2 end
   end
 end
@@ -103,7 +108,6 @@ function Multiplayer:update(dt)
   self.tick = self.tick + (dt * self.tickrate)
   if self.last_tick ~= math.floor(self.tick) then
     self.last_tick = math.floor(self.tick)
-    print('tick')
     self.needs_update = {}
     self.game:call_mpTick()
   end

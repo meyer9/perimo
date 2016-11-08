@@ -39,12 +39,11 @@ end
 
 function Player:update(dt)
   local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
-  if self.game.multiplayer.isConnected and self.game.multiplayer.currentGamestate.updated and self.controllable and util.has_value(self.game.multiplayer.needs_update, playerUUID) then
-    if not alreadyUpdated then
-      util.remove_value(self.game.multiplayer.needs_update, playerUUID)
-      self.x = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "x")
-      self.y = self.game.multiplayer.currentGamestate:getObjectProp(playerUUID, "y")
-    end
+  local gamestate = self.game.multiplayer.gamestate_runner:run(dt)
+  if gamestate and gamestate:getObjectProp(playerUUID, "x") then
+    -- util.remove_value(self.game.multiplayer.needs_update, playerUUID)
+    self.x = gamestate:getObjectProp(playerUUID, "x")
+    self.y = gamestate:getObjectProp(playerUUID, "y")
   end
   if love.keyboard.isDown("w") then
     self.y = self.y - dt * 100
