@@ -74,7 +74,11 @@ function Gamestate:updateState(objectID, prop, state)
 end
 
 function Gamestate:getObjectProp(objectID, prop)
-  return self._state[objectID][prop]
+  if self._state[objectID] and self._state[objectID][prop] then
+    return self._state[objectID][prop]
+  else
+    return nil
+  end
 end
 
 function Gamestate:clone()

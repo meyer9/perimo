@@ -102,44 +102,12 @@ function GameMap:draw()
   for m = startPosY,  math.ceil((visible_tile_y + visible_tile_height) / gridSize) + 2 do
     for n = math.ceil(visible_tile_x / gridSize) - 2,  math.ceil((visible_tile_x + visible_tile_width) / gridSize) + 2 do
       math.randomseed(m + 1000* n)
-      table.insert(points, {n * gridSize + (m % 2) * gridSize / 2 + math.random() * variance, m * gridSize + math.random() * variance})
+      table.insert(points, n * gridSize + (m % 2) * gridSize / 2 + math.random() * variance)
+      table.insert(points, m * gridSize + math.random() * variance)
     end
   end
 
-  for n = 1, #points do
-    if n < #points - numTilesRow and n % numTilesRow ~= 0  and n % numTilesRow ~= 1 then
-      tile_offset = (math.ceil(n / numTilesRow) % 2) + ((startPosY + 1) % 2)
-      if tile_offset == 2 then tile_offset = 0 end
-      -- if points[n][1] - points[n + numTilesRow - 1][1] < -400 then
-      --   print(n % numTilesRow)
-      -- end
-      local tri1 = {points[n][1], points[n][2], points[n + 1][1], points[n + 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow + tile_offset][2]}
-      local tri2 = {points[n][1], points[n][2], points[n + numTilesRow + tile_offset - 1][1], points[n + numTilesRow + tile_offset - 1][2], points[n + numTilesRow + tile_offset][1], points[n + numTilesRow][2]}
-
-      local tri1_centroid = {(tri1[1] + tri1[3] + tri1[5]) / 3 + visible_tile_x, (tri1[2] + tri1[3] + tri1[4]) / 3 + visible_tile_y}
-      local tri2_centroid = {(tri2[1] + tri2[3] + tri2[5]) / 3 + visible_tile_x, (tri2[2] + tri2[3] + tri2[4]) / 3 + visible_tile_y}
-
-      love.graphics.setColor(0,0,0)
-      if self:get_tile(math.ceil(tri1_centroid[1] / gridSize), math.ceil(tri1_centroid[2] / gridSize)) == Tiles.ID.WATER then
-        love.graphics.setColor(0,0,255)
-      else
-        love.graphics.setColor(0,255,0)
-      end
-      love.graphics.polygon('fill', tri1)
-      love.graphics.polygon('line', tri1)
-      if self:get_tile(math.ceil(tri2_centroid[1] / gridSize), math.ceil(tri2_centroid[2] / gridSize)) == Tiles.ID.WATER then
-        love.graphics.setColor(0,0,255)
-      else
-        love.graphics.setColor(0,255,0)
-      end
-      love.graphics.polygon('fill', tri2)
-      love.graphics.polygon('line', tri2)
-      -- love.graphics.setColor(0,0,0)
-      -- love.graphics.polygon('fill', tri2)
-      -- love.graphics.setColor(255, 255, 255)
-      -- love.graphics.polygon('line', tri2)
-    end
-  end
+  love.graphics.points(points)
   love.graphics.setColor(255, 255, 255)
 end
 

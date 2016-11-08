@@ -69,7 +69,7 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	o.bitsInLastSecond = 0
 	o.secondsLeft = 1
 	o.tick = 0
-	o.tickrate = 1
+	o.tickrate = 2
 	o.time = 0
 
 	return o
@@ -243,7 +243,7 @@ function Server:received( command, msg, user, udp )
 
 		-- Let user know about the (possibly corrected) username and his
 		-- client id:
-		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName .. "|" .. self.tick, user, udp )
+		self:send( CMD.PLAYERNAME, user.id .. "|" .. user.playerName .. "|" .. self.tick .. "|" .. socket.gettime(), user, udp )
 
 		-- Let all users know about the new user...
 		self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName, nil, udp )

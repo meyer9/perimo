@@ -12,7 +12,6 @@ local uuid = require 'uuid'
 local util = require 'util'
 local COMMANDS = require('common.commands')
 local Gamestate = require('common.gamestate')
-local GamestateHistory = require 'common.gamestate_history'
 local messagepack = require('msgpack.MessagePack')
 
 local Multiplayer = class('Multiplayer', Entity)
@@ -20,7 +19,6 @@ local Multiplayer = class('Multiplayer', Entity)
 function Multiplayer:load()
   self.tickrate = self.superentity.tickrate
   self.isConnected = false
-  self.gamestate_history = GamestateHistory:new()
   self.currentGamestate = Gamestate:new()
   self.tick = 0
   self.time_since_dt = socket.gettime()
@@ -71,7 +69,6 @@ function Multiplayer:received(cmd, parms)
     self.superentity.map:deserialize(parms)
   end
   if cmd == COMMANDS.full_update then
-    self.gamestate_history:newFrame(self.currentGamestate:clone())
     self.currentGamestate:deserialize(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
     for entity_id, _ in pairs(messagepack.unpack(parms)) do
@@ -82,7 +79,6 @@ function Multiplayer:received(cmd, parms)
     if tick then self.tick = tick - 2 end
   end
   if cmd == COMMANDS.delta_update then
-    self.gamestate_history:newFrame(self.currentGamestate:clone())
     self.currentGamestate:deserializeDeltaAndUpdate(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
     for entity_id, _ in pairs(messagepack.unpack(parms)) do
@@ -93,6 +89,12 @@ function Multiplayer:received(cmd, parms)
 end
 
 function Multiplayer:newUser(user)
+end
+
+function Multiplayer:getTick()
+  local dt = socket.gettime() - self.time_since_dt
+  self.time_since_dt = socket.gettime()
+  return self.tick + (dt * self.tickrate)
 end
 
 function Multiplayer:update(dt)

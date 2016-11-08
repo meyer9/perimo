@@ -59,6 +59,7 @@ function Client:new( address, port, playerName, authMsg, portUDP )
 	o.clientID = nil
 	o.authKey = -1
 	o.playerName = playerName
+	o.tickrate = 16
 
 	numberOfUsers = 0
 
@@ -211,11 +212,13 @@ function Client:received( command, msg, udp )
 		end
 
 	elseif command == CMD.PLAYERNAME then
-		local id, playerName, tick = string.match( msg, "(.*)|(.*)|(.*)" )
+		local id, playerName, tick, time = string.match( msg, "(.*)|(.*)|(.*)|(.*)" )
+		ticksBetween = (socket.gettime() - time) * self.tickrate
+		print('ticks:' .. ticksBetween)
 		-- print(id, playerName, tick)
 		self.playerName = playerName
 		self.clientID = tonumber(id)
-		self.tick = tick
+		self.tick = tick + ticksBetween
 		-- At this point I am fully connected!
 		if self.callbacks.connected then
 			self.callbacks.connected()

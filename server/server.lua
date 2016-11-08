@@ -80,7 +80,7 @@ function Server:initialize()
 
   self.dt = 0
   self.time = socket.gettime()
-  self.server.tickrate = 3
+  self.server.tickrate = 2
 
   self.lastGamestate = nil
   self.currentGamestate = Gamestate:new(self.tick)
