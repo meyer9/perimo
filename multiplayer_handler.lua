@@ -98,14 +98,15 @@ end
 
 function Multiplayer:getTick()
   local dt = socket.gettime() - self.time_since_dt
-  self.time_since_dt = socket.gettime()
   return self.tick + (dt * self.tickrate)
 end
 
 function Multiplayer:update(dt)
-  local dt = socket.gettime() - self.time_since_dt
-  self.time_since_dt = socket.gettime()
+  local t = socket.gettime()
+  local dt = t - self.time_since_dt
+  self.time_since_dt = t
   self.tick = self.tick + (dt * self.tickrate)
+  -- print("Multiplayer update: time: " .. math.floor(self.tick) .. ', ' .. self.tick)
   if self.last_tick ~= math.floor(self.tick) then
     self.last_tick = math.floor(self.tick)
     self.needs_update = {}
