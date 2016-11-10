@@ -1,11 +1,18 @@
-------------------------------------------------------------------------------
---	FILE:	  util.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Utility class for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Class to maintain all utility functions.
+--
+-- @module Util
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 Util = {}
 
+-------------------------------------------------
+-- Deep copies a table
+-- @tparam tab t Table to clone.
+-- @treturn tab Cloned table.
+-------------------------------------------------
 function Util.clone (t) -- deep-copy a table
     if type(t) ~= "table" then return t end
     local meta = getmetatable(t)
@@ -21,6 +28,10 @@ function Util.clone (t) -- deep-copy a table
     return target
 end
 
+-------------------------------------------------
+-- Prints complex data structures like tables.
+-- @tparam tab t Table to print.
+-------------------------------------------------
 function Util.print_r ( t )
     local print_r_cache={}
     local function sub_print_r(t,indent)
@@ -46,8 +57,21 @@ function Util.print_r ( t )
     sub_print_r(t,"  ")
 end
 
+-------------------------------------------------
+-- Finds the distance between two points
+-- @tparam int x1 X-Coordinate of first point
+-- @tparam int y1 Y-Coordinate of first point
+-- @tparam int x2 X-Coordinate of second point
+-- @tparam int y2 Y-Coordinate of second point
+-------------------------------------------------
 function Util.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 
+-------------------------------------------------
+-- Checks if a table contains a value.
+-- @tparam tab tab Table to check.
+-- @param val Value to check.
+-- @treturn bool Whether tab contains val.
+-------------------------------------------------
 function Util.has_value (tab, val)
     for index, value in ipairs (tab) do
         if value == val then
@@ -58,6 +82,12 @@ function Util.has_value (tab, val)
     return false
 end
 
+-------------------------------------------------
+-- Removes a value from a table
+-- @tparam tab tab Table to remove from.
+-- @param val Value to remove.
+-- @treturn bool false if value not found.
+-------------------------------------------------
 function Util.remove_value (tab, val)
     for index, value in ipairs (tab) do
         if value == val then

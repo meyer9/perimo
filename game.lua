@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  game.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Base game class for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Base game class for Perimo
+--
+-- @classmod Game
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 -- Third-party Libraries
 local class = require 'middleclass'
@@ -18,6 +20,10 @@ local Camera = require 'camera'
 
 local Game = class('Game', Entity)
 
+-------------------------------------------------
+-- Initializes the game, sets up graphics, multiplayer,
+-- camera, and player
+-------------------------------------------------
 function Game:initialize()
   Entity.initialize(self)
   love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -42,14 +48,17 @@ function Game:initialize()
   self.camera = Camera(0, 0, 2)
 end
 
+-------------------------------------------------
+-- Connects to multiplayer.
+-------------------------------------------------
 function Game:load()
   self.multiplayer:connect()
 end
 
--- function Game:playerJoin()
---   table.insert(self.players
--- end
-
+-------------------------------------------------
+-- Hooks into the pre update code to update the camera
+-- position based on the player position.
+-------------------------------------------------
 function Game:call_update(dt)
   -- self.multiplayer:update(dt)
   Entity.call_update(self, dt)
@@ -70,10 +79,16 @@ function Game:call_update(dt)
   end
 end
 
+-------------------------------------------------
+-- Translates the screen to the current camera position
+-------------------------------------------------
 function Game:draw()
   self.camera:attach()
 end
 
+-------------------------------------------------
+-- Draws an FPS counter and untranslates the screen.
+-------------------------------------------------
 function Game:end_draw()
   self.camera:detach()
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 10)

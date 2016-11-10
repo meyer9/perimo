@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  player.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Player entity for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Class to handle player interactions during a game.
+--
+-- @classmod Player
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 -- Third-party Imports
 local class = require 'middleclass'
@@ -14,12 +16,20 @@ local util = require 'util'
 
 local Player = class('Player', Entity)
 
+-------------------------------------------------
+-- Initializes a new player.
+-- @tparam bool controllable Whether the user should be controlled using the current client.
+-- @tparam string name name of the player
+-------------------------------------------------
 function Player:initialize(controllable, name)
   Entity.initialize(self)
   self.controllable = controllable
   self.name = name
 end
 
+-------------------------------------------------
+-- Sets up player graphics, fonts, and initial properties.
+-------------------------------------------------
 function Player:load()
   self.torsoAnimation = Animation:new('player.png', 16, 16, 4, 0.3)
   self.legAnimation = Animation:new('legs_anim.png', 16, 16, 9, 0.07)
@@ -36,34 +46,25 @@ function Player:load()
   self.playerFont = love.graphics.newFont(10)
 end
 
+-------------------------------------------------
+-- Updates the player position using interpolation.
+-- @tparam number dt Amount of time in seconds passed since last update.
+-------------------------------------------------
 function Player:update(dt)
   local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
   local interpolation = self.game.multiplayer.interpolation
-  -- print(self.game.multiplayer:getTick())
-  -- print("Player update: time:" .. math.floor(self.game.multiplayer:getTick()) .. ", " .. self.game.multiplayer:getTick())
-  -- local interpX = interpolation:interpolate(playerUUID, "x", self.game.multiplayer:getTick())
-  -- local interpY = interpolation:interpolate(playerUUID, "y", self.game.multiplayer:getTick())
   local interpX = self.game.multiplayer.gamestate_runner:getFrameProp(playerUUID, 'x', self.game.multiplayer:getTick() + 1)
   local interpY = self.game.multiplayer.gamestate_runner:getFrameProp(playerUUID, 'y', self.game.multiplayer:getTick() + 1)
   if interpX and interpY then
-    -- util.remove_value(self.game.multiplayer.needs_update, playerUUID)
     self.x = interpX
     self.y = interpY
   end
-  -- if love.keyboard.isDown("w") then
-  --   self.y = self.y - dt * 100
-  -- elseif love.keyboard.isDown("s") then
-  --   self.y = self.y + dt * 100
-  -- end
-  -- if love.keyboard.isDown("a") then
-  --   self.x = self.x - dt * 100
-  -- elseif love.keyboard.isDown("d") then
-  --   self.x = self.x + dt * 100
-  -- end
 end
 
+-------------------------------------------------
+-- Sends commands to the server if necessary.
+-------------------------------------------------
 function Player:mpTick()
-  local dt = 1 / self.game.tickrate
   if self.controllable then
     if love.keyboard.isDown("w") then
       self.game.multiplayer:sendCommand("forward", nil, true)
@@ -78,6 +79,9 @@ function Player:mpTick()
   end
 end
 
+-------------------------------------------------
+-- Draws the player using the players current X and Y.
+-------------------------------------------------
 function Player:draw()
   -- draw torso
 

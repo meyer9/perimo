@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  main.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Main game entry point for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Entry point for Perimo.
+--
+-- @module ClientMain
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 -- Local Imports
 local Game = require 'Game'
