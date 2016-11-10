@@ -103,7 +103,6 @@ function Server:handle_message(cmd, parms, user)
   local player_uuid = user.customData.player_uuid
   local dt = 1 / self.server.tickrate
   if player_uuid then
-    print(cmd, parms)
     if cmd == COMMANDS.forward then
       local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
       self.currentGamestate:updateState(player_uuid, "y", currentY - 100 * dt)
