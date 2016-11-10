@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  multiplayer_handler.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Multiplayer handler for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Multiplayer handler for the client side of perimo.
+--
+-- @classmod MultiplayerHandler
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 -- Local Imports
 local class = require 'middleclass'
@@ -17,6 +19,9 @@ local messagepack = require('msgpack.MessagePack')
 
 local Multiplayer = class('Multiplayer', Entity)
 
+-------------------------------------------------
+-- Sets up the multiplayer helper classes
+-------------------------------------------------
 function Multiplayer:load()
   self.tickrate = self.superentity.tickrate
   self.isConnected = false
@@ -28,6 +33,11 @@ function Multiplayer:load()
   self.gamestate_runner = GamestateRunner:new(self.game.tickrate)
 end
 
+-------------------------------------------------
+-- Connects to a multiplayer game on host, port.
+-- @tparam string host Hostname to connect to
+-- @tparam int port Port to connect to
+-------------------------------------------------
 function Multiplayer:connect(host, port)
   if not host then host = 'localhost' end
   if not port then port = 1337 end
@@ -54,6 +64,13 @@ function Multiplayer:connect(host, port)
   self.client.callbacks.newUser = callNewUser
 end
 
+-------------------------------------------------
+-- Sends a command to the server and adds it to the client
+-- representation as well.
+-- @tparam string command Command to send using Commands module.
+-- @tparam string parms Parameters to send.
+-- @tparam bool udp Whether to use UDP or not.
+-------------------------------------------------
 function Multiplayer:sendCommand(command, parms, udp)
   if not udp then udp = false end
   self.client:send(COMMANDS[command], parms, udp)
@@ -61,12 +78,20 @@ function Multiplayer:sendCommand(command, parms, udp)
   self.gamestate_runner:addCommand(player_uuid, COMMANDS[command], self.tick, params)
 end
 
+-------------------------------------------------
+-- Called when client is connected to the server.
+-------------------------------------------------
 function Multiplayer:connected()
   print('Connected to server.')
   self.isConnected = true
   self.client:send(COMMANDS.handshake, nil, true)
 end
 
+-------------------------------------------------
+-- Called whenever client receives a command.
+-- @tparam int cmd Command received.
+-- @tparam string parms Parameters received.
+-------------------------------------------------
 function Multiplayer:received(cmd, parms)
   if cmd == COMMANDS['map'] then
     print("Loaded map...")
@@ -93,14 +118,25 @@ function Multiplayer:received(cmd, parms)
   end
 end
 
+-------------------------------------------------
+-- Called when a new user joins.
+-------------------------------------------------
 function Multiplayer:newUser(user)
 end
 
+-------------------------------------------------
+-- Retrieves the exact fractional tick of the current time.
+-- @treturn number Exact fractional tick of current time.
+-------------------------------------------------
 function Multiplayer:getTick()
   local dt = socket.gettime() - self.time_since_dt
   return self.tick + (dt * self.tickrate)
 end
 
+-------------------------------------------------
+-- Updates the multiplayer client and ticks if needed.
+-- @tparam number dt The amount of time in seconds passed since last update
+-------------------------------------------------
 function Multiplayer:update(dt)
   local t = socket.gettime()
   local dt = t - self.time_since_dt

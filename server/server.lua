@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  server.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Base server class for perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Class to handle server setup and logic.
+--
+-- @classmod Server
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
@@ -22,6 +24,10 @@ uuid.seed()
 
 local currentClients = {}
 
+-------------------------------------------------
+-- Creates a new server and connects it to a port based on
+-- arg.
+-------------------------------------------------
 function Server:initialize()
   local addr, port = '*', 1337
   if #arg == 1 then
@@ -86,6 +92,10 @@ function Server:initialize()
   self.currentGamestate = Gamestate:new(self.tick)
 end
 
+-------------------------------------------------
+-- Initializes player data for a new player in the game.
+-- @tparam tab user User who joined the game.
+-------------------------------------------------
 function Server:userFullyConnected(user)
   local player_uuid = self.currentGamestate:addObject()
   self.server:setUserValue(user, 'player_uuid', player_uuid)
@@ -95,10 +105,21 @@ function Server:userFullyConnected(user)
   self.server:send(COMMANDS.full_update, serialized_state)
 end
 
+-------------------------------------------------
+-- Authorizes a player to join the game.
+-- @tparam tab user User who is trying to join.
+-- @tparam string authMsg from user who is trying to join.
+-------------------------------------------------
 function Server:auth(user, authMsg)
   return true
 end
 
+-------------------------------------------------
+-- Handles messages sent to the server. [deprecated]
+-- @tparam int cmd Command received.
+-- @tparam string parms Parameters received.
+-- @tparam tab user User data of client sending data.
+-------------------------------------------------
 function Server:handle_message(cmd, parms, user)
   local player_uuid = user.customData.player_uuid
   local dt = 1 / self.server.tickrate
@@ -120,11 +141,18 @@ function Server:handle_message(cmd, parms, user)
   end
 end
 
+-------------------------------------------------
+-- Sends the map to the user.
+-- @tparam tab user User that needs to be synchronized.
+-------------------------------------------------
 function Server:synchronize(user)
   local serialized_map = self.map:serialize()
   self.server:send(COMMANDS['map'], serialized_map, user)
 end
 
+-------------------------------------------------
+-- Updates the server every 10000th of a second.
+-------------------------------------------------
 function Server:update()
   self.server:update(self.dt)
 
@@ -133,9 +161,13 @@ function Server:update()
 
 	-- This is important. Play with this value to fit your need.
 	-- If you don't use this sleep command, the CPU will be used as much as possible, you'll probably run the game loop WAY more often than on the clients (who also require time to render the picture - something you don't need)
-	-- socket.sleep( 0.0001 )
+	socket.sleep( 0.0001 )
 end
 
+-------------------------------------------------
+-- Updates the gamestate and sends it to all clients in the game
+-- @tparam int tick Tick number to send.
+-------------------------------------------------
 function Server:mpTick(tick)
   self.currentGamestate:updateState('server', 'tick', tick)
   local users = self.server:getUsers()

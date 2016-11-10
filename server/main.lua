@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  main.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Entry point for Perimo server
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Main entry point for Perimo server.
+--
+-- @module ServerMain
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 local Server = require('server')
 local socket = require('socket')

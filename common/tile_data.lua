@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  tile_data.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  To provide tile data for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Tile data for Perimo.
+--
+-- @classmod TileData
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
@@ -189,7 +191,12 @@ Tiles.Data = {
 -- AND HERE
 
 
--- generates tiles using spritesheet width (sw), and spritesheet height (sh)
+-------------------------------------------------
+-- Generates quads for each tile in tile data and
+-- sets it to the quad property of that tile.
+-- @tparam int sw Spritesheet width
+-- @tparam int sh Spritesheet height
+-------------------------------------------------
 function Tiles.generate_tiles(sw, sh)
   for i, tile in pairs(Tiles.Data) do
     if type(tile) ~= 'function' and tile.should_draw ~= false then
@@ -215,6 +222,10 @@ function Tiles.generate_tiles(sw, sh)
   end
 end
 
+-------------------------------------------------
+-- Gets tiledata for a specific tile id.
+-- @tparam int id Tile ID to retrieve.
+-------------------------------------------------
 function Tiles.tile(id)
   return Tiles.Data[Tiles.ID[id]]
 end
