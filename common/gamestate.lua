@@ -1,8 +1,11 @@
-------------------------------------------------------------------------------
---	FILE:	  gamestate.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Representation of game state on server
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Class to keep track of gamestate objects and
+-- transferred between client and server
+--
+-- @classmod Gamestate
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
@@ -13,27 +16,56 @@ local messagepack = require('msgpack.MessagePack')
 
 local Gamestate = class('Gamestate')
 
+-------------------------------------------------
+-- Constructor function of Gamestate class
+--
+-- @tparam int tick the tick from which the gamestate was taken
+-------------------------------------------------
 function Gamestate:initialize(tick)
   self._state = {server = {tick = 0}}
   self.updated = false
 end
 
+-------------------------------------------------
+-- Serialize the gamestate into a string to send
+-- to the server
+--
+-- @treturn string serialized gamestate
+-------------------------------------------------
 function Gamestate:serialize()
   -- util.print_r(self._state)
   return messagepack.pack(self._state)
 end
 
+-------------------------------------------------
+-- Deserialize string into a gamestate
+--
+-- @tparam string packed_state Serialized gamestate
+-------------------------------------------------
 function Gamestate:deserialize(packed_state)
   -- print(packed_state)
   self._state = messagepack.unpack(packed_state)
   self.updated = true
 end
 
+-------------------------------------------------
+-- Helper function to get the current tick of a
+-- gamestate
+--
+-- @treturn int Current tick
+-------------------------------------------------
 function Gamestate:getTick()
   local tick = self:getObjectProp('server', 'tick')
   return tick
 end
 
+-------------------------------------------------
+-- Calculate a delta between two gamestates using
+-- itself as the new gamestate
+--
+-- @tparam Gamestate old_gamestate Gamestate to calculate delta from
+-- @treturn tab delta
+-------------------------------------------------
 function Gamestate:delta(old_gamestate)
   local old_state = old_gamestate._state
   local delta = {}
@@ -49,20 +81,43 @@ function Gamestate:delta(old_gamestate)
   return delta
 end
 
+-------------------------------------------------
+-- Calculate a delta between two gamestates, then
+-- serialize that delta
+--
+-- @tparam Gamestate old_gamestate Gamestate to calculate delta from
+-- @treturn string delta
+-------------------------------------------------
 function Gamestate:deltaSerialize(old_gamestate)
   local delta = self:delta(old_gamestate)
   return messagepack.pack(delta)
 end
 
+-------------------------------------------------
+-- Deserialize a delta ** does not apply it **
+--
+-- @tparam string delta_str String to deserialize delta from
+-- @treturn tab delta
+-------------------------------------------------
 function Gamestate:deserializeDelta(delta_str)
   return messagepack.unpack(delta_str)
 end
 
+-------------------------------------------------
+-- Apply a serialized delta to the current gamestate
+--
+-- @tparam string delta_str String to deserialize delta from
+-------------------------------------------------
 function Gamestate:deserializeDeltaAndUpdate(delta_str)
   local delta = self:deserializeDelta(delta_str)
   self:deltaUpdate(delta)
 end
 
+-------------------------------------------------
+-- Update state using delta
+--
+-- @tparam tab delta Delta to update using
+-------------------------------------------------
 function Gamestate:deltaUpdate(delta)
   for entity_uuid, props in pairs(delta) do
     for prop, val in pairs(props) do
@@ -72,12 +127,27 @@ function Gamestate:deltaUpdate(delta)
   end
 end
 
+-------------------------------------------------
+-- Update property in gamestate. If object doesn't exist,
+-- create it.
+--
+-- @tparam string objectID object UUID to update
+-- @tparam string prop property to update
+-- @param state state to change the property to
+-------------------------------------------------
 function Gamestate:updateState(objectID, prop, state)
-  -- print(objectID, prop, state)
   if not self._state[objectID] then self._state[objectID] = {} end
   self._state[objectID][prop] = state
 end
 
+-------------------------------------------------
+-- Gets the property of an object if it exists, otherwise
+-- returns nil
+--
+-- @tparam string objectID object UUID to retrieve
+-- @tparam string prop property to retrieve
+-- @return property value of object
+-------------------------------------------------
 function Gamestate:getObjectProp(objectID, prop)
   if self._state[objectID] and self._state[objectID][prop] then
     return self._state[objectID][prop]
@@ -86,12 +156,23 @@ function Gamestate:getObjectProp(objectID, prop)
   end
 end
 
+-------------------------------------------------
+-- Deep clone the current object
+--
+-- @treturn Gamestate cloned gamestate
+-------------------------------------------------
 function Gamestate:clone()
   local new_gamestate = Gamestate:new()
   new_gamestate._state = util.clone(self._state)
   return new_gamestate
 end
 
+-------------------------------------------------
+-- Adds and object to the state and returns its
+-- UUID.
+--
+-- @treturn UUID of newly created object
+-------------------------------------------------
 function Gamestate:addObject()
   objectUUID = uuid()
   self._state[objectUUID] = {}

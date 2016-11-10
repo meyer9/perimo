@@ -1,8 +1,11 @@
-------------------------------------------------------------------------------
---	FILE:	  map.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Map representation for Perimo
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Class to represent a tiled map and generate
+-- the map.
+--
+-- @classmod Map
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
@@ -17,6 +20,13 @@ local Tiles = require 'common.tile_data'
 
 local Map = class('Map', Entity)
 
+-------------------------------------------------
+-- Constructor function of Map class. Initializes map
+-- using empty tiles.
+--
+-- @tparam int width width of map
+-- @tparam int height height of map
+-------------------------------------------------
 function Map:initialize(width, height)
   -- generate initial map data
   if not width then self.width = 500 else self.width = width end
@@ -30,6 +40,13 @@ function Map:initialize(width, height)
   end
 end
 
+-------------------------------------------------
+-- Gets the ID of the tile at x, y
+--
+-- @tparam int x X-coordinate of tile to retrieve
+-- @tparam int y Y-coordinate of tile to retrieve
+-- @treturn int ID of tile at coordinate
+-------------------------------------------------
 function Map:get_tile(x, y)
   if self.map_data[x] and self.map_data[x][y] then
     return self.map_data[x][y]
@@ -38,6 +55,13 @@ function Map:get_tile(x, y)
   end
 end
 
+-------------------------------------------------
+-- Sets a tile at x, y to tile
+--
+-- @tparam int x X-coordinate of tile to set
+-- @tparam int y Y-coordinate of tile to set
+-- @tparam int tile Tile ID to set
+-------------------------------------------------
 function Map:set_tile(x, y, tile)
   self.map_data[x][y] = tile
   self:changed()
@@ -55,9 +79,12 @@ function fBm(x, y, z, octaves, lacunarity, gain)
     amplitude = amplitude * gain
     frequency = frequency * lacunarity
   end
-  return sum;
+  return sum
 end
 
+-------------------------------------------------
+-- Generates the map.
+-------------------------------------------------
 function Map:generate_island()
   smoothness = 20
   iterations = 4
@@ -93,6 +120,11 @@ function Map:generate_island()
   end
 end
 
+-------------------------------------------------
+-- Serializes the map to send over the network
+--
+-- @treturn tab serialized map
+-------------------------------------------------
 function Map:serialize()
   serialized_map = ''
   serialized_map = serialized_map .. self.width .. ';' .. self.height .. ';'
@@ -105,10 +137,18 @@ function Map:serialize()
   return serialized_map
 end
 
+-------------------------------------------------
+-- Hook for map changes
+-------------------------------------------------
 function Map:changed()
   -- hook for map changes
 end
 
+-------------------------------------------------
+-- Deserializes the map from the network.
+--
+-- @tparam string serialized Serialized map
+-------------------------------------------------
 function Map:deserialize(serialized)
   local first = string.find(serialized, ';')
   local second = string.find(serialized, ';', first + 1)
@@ -120,7 +160,7 @@ function Map:deserialize(serialized)
   local x = 1
   local map_data = serialized:sub(second + 1)
   for i = 0, (#map_data / 3) - 1 do
-    local c = map_data:sub(i * 3 + 1,i * 3 + 3)
+    local c = map_data:sub(i * 3 + 1, i * 3 + 3)
     new_map[x][y] = tonumber(c)
     y = y + 1
     if (i + 1) % height == 0 then
