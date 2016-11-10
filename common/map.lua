@@ -67,21 +67,6 @@ function Map:set_tile(x, y, tile)
   self:changed()
 end
 
-function fBm(x, y, z, octaves, lacunarity, gain)
-  if not octaves then octaves = 8 end
-  if not lacunarity then lacunarity = 2.0 end
-  if not gain then gain = 0.5 end
-  amplitude = 1.0
-  frequency = 1.0
-  sum = 0.0
-  for i = 0, octaves do
-    sum = sum + amplitude * noise(x * frequency, y * frequency, z * frequency)
-    amplitude = amplitude * gain
-    frequency = frequency * lacunarity
-  end
-  return sum
-end
-
 -------------------------------------------------
 -- Generates the map.
 -------------------------------------------------

@@ -98,4 +98,15 @@ function Util.remove_value (tab, val)
     return false
 end
 
+-------------------------------------------------
+-- Interpolates between v0 and v1 by t
+-- @tparam number v0 First value to interpolate between.
+-- @tparam number v1 Second value to interpolate between.
+-- @tparam number t Percentage to interpolate between.
+-- @treturn number Interpolated value.
+-------------------------------------------------
+function Util.lerp(v0, v1, t)
+  return (1-t) * v0 + t * v1
+end
+
 return Util

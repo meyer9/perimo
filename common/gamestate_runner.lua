@@ -13,6 +13,7 @@ package.path = package.path .. ";../?.lua" -- include from top directory
 local class = require 'middleclass'
 local Gamestate = require 'common.gamestate'
 local COMMANDS = require 'common.commands'
+local Util = require 'util'
 
 local GamestateRunner = class('GamestateRunner')
 
@@ -86,10 +87,6 @@ function GamestateRunner:addCommand(entity_uuid, command, tick, params)
   table.insert(self.command_history, {player=entity_uuid, cmd = command, params = params, tick = tick})
 end
 
-function lerp(v0, v1, t)
-  return (1-t) * v0 + t * v1
-end
-
 -------------------------------------------------
 -- Gets or interpolates a property for a specific tick
 --
@@ -121,7 +118,7 @@ function GamestateRunner:getFrameProp(entity, property, exactTick)
     local propStart = interpStart:getObjectProp(entity, property)
     local propEnd = interpEnd:getObjectProp(entity, property)
     if propStart and propEnd then
-      return lerp(propEnd, propStart, percentBetween)
+      return Util.lerp(propEnd, propStart, percentBetween)
     else
       return nil
     end
