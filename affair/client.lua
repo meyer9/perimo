@@ -214,7 +214,6 @@ function Client:received( command, msg, udp )
 	elseif command == CMD.PLAYERNAME then
 		local id, playerName, tick, time = string.match( msg, "(.*)|(.*)|(.*)|(.*)" )
 		ticksBetween = (socket.gettime() - time) * self.tickrate
-		print('ticks:' .. ticksBetween)
 		-- print(id, playerName, tick)
 		self.playerName = playerName
 		self.clientID = tonumber(id)

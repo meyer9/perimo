@@ -29,6 +29,11 @@ function Gamestate:deserialize(packed_state)
   self.updated = true
 end
 
+function Gamestate:getTick()
+  local tick = self:getObjectProp('server', 'tick')
+  return tick
+end
+
 function Gamestate:delta(old_gamestate)
   local old_state = old_gamestate._state
   local delta = {}

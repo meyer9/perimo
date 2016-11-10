@@ -39,22 +39,28 @@ end
 
 function Player:update(dt)
   local playerUUID = self.game.multiplayer.client:getUserValue("player_uuid")
-  local gamestate = self.game.multiplayer.gamestate_runner:run(dt)
-  if gamestate and gamestate:getObjectProp(playerUUID, "x") then
+  local interpolation = self.game.multiplayer.interpolation
+  -- print(self.game.multiplayer:getTick())
+  -- print("Player update: time:" .. math.floor(self.game.multiplayer:getTick()) .. ", " .. self.game.multiplayer:getTick())
+  -- local interpX = interpolation:interpolate(playerUUID, "x", self.game.multiplayer:getTick())
+  -- local interpY = interpolation:interpolate(playerUUID, "y", self.game.multiplayer:getTick())
+  local interpX = self.game.multiplayer.gamestate_runner:getFrameProp(playerUUID, 'x', self.game.multiplayer:getTick() + 1)
+  local interpY = self.game.multiplayer.gamestate_runner:getFrameProp(playerUUID, 'y', self.game.multiplayer:getTick() + 1)
+  if interpX and interpY then
     -- util.remove_value(self.game.multiplayer.needs_update, playerUUID)
-    self.x = gamestate:getObjectProp(playerUUID, "x")
-    self.y = gamestate:getObjectProp(playerUUID, "y")
+    self.x = interpX
+    self.y = interpY
   end
-  if love.keyboard.isDown("w") then
-    self.y = self.y - dt * 100
-  elseif love.keyboard.isDown("s") then
-    self.y = self.y + dt * 100
-  end
-  if love.keyboard.isDown("a") then
-    self.x = self.x - dt * 100
-  elseif love.keyboard.isDown("d") then
-    self.x = self.x + dt * 100
-  end
+  -- if love.keyboard.isDown("w") then
+  --   self.y = self.y - dt * 100
+  -- elseif love.keyboard.isDown("s") then
+  --   self.y = self.y + dt * 100
+  -- end
+  -- if love.keyboard.isDown("a") then
+  --   self.x = self.x - dt * 100
+  -- elseif love.keyboard.isDown("d") then
+  --   self.x = self.x + dt * 100
+  -- end
 end
 
 function Player:mpTick()
@@ -75,6 +81,7 @@ end
 
 function Player:draw()
   -- draw torso
+
   local mousePositionX, mousePositionY = self.game.camera:mousePosition()
   local rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
 
