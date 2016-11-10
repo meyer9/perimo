@@ -10,7 +10,6 @@ local class = require 'middleclass'
 -- Local Imports
 local Entity = require 'entity'
 local Animation = require 'animation'
-local Bullet = require 'bullet'
 local util = require 'util'
 
 local Player = class('Player', Entity)
