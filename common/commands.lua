@@ -1,8 +1,10 @@
-------------------------------------------------------------------------------
---	FILE:	  commands.lua
---	AUTHOR:   Julian Meyer
---	PURPOSE:  Provides client <-> server commands
-------------------------------------------------------------------------------
+-------------------------------------------------
+-- Module to keep track of server <-> client communication commands
+--
+-- @module Commands
+-- @author Julian Meyer
+-- @copyright Julian Meyer 2016
+-------------------------------------------------
 
 -- start from 13
 
