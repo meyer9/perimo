@@ -14,7 +14,6 @@ local Entity = require 'entity'
 local GameMap = require 'gamemap'
 local Multiplayer = require 'multiplayer_handler'
 local Player = require 'player'
-local MultiplayerPlayers = require 'multiplayer_players'
 local Camera = require 'camera'
 
 
@@ -38,9 +37,6 @@ function Game:initialize()
 
   self.player = Player:new(true, "player" .. math.floor(math.random() * 100))
   self:addSubentity(self.player)
-
-  self.multiplayer_players = MultiplayerPlayers:new()
-  self:addSubentity(self.multiplayer_players)
 
   self.multiplayer = Multiplayer:new()
   self:addSubentity(self.multiplayer)

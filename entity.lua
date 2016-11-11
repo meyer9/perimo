@@ -54,6 +54,13 @@ end
 -------------------------------------------------
 function Entity:call_load()
   self:load()
+  if self.subentities then
+    for objectId, subentity in ipairs(self.subentities) do
+      if subentity ~= nil then
+        subentity:call_load()
+      end
+    end
+  end
 end
 
 -------------------------------------------------
