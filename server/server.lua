@@ -63,12 +63,17 @@ function Server:initialize()
     return self:mpTick(...)
   end
 
+  function callUserDisconnected(...)
+    return self:userDisconnected(...)
+  end
+
   self.server.callbacks.received = callHandle
   self.server.callbacks.authorize = callAuth
   self.server.callbacks.synchronize = callSync
   self.server.callbacks.customDataChanged = newUserData
   self.server.callbacks.userFullyConnected = callUserFullyConnected
   self.server.callbacks.tick = callTick
+  self.server.callbacks.disconnectedUser = callUserDisconnected
 
   if not self.server then
     print('Server creation failed.')
@@ -97,12 +102,20 @@ end
 -- @tparam tab user User who joined the game.
 -------------------------------------------------
 function Server:userFullyConnected(user)
-  local player_uuid = self.currentGamestate:addObject()
+  local player_uuid = self.currentGamestate:addObject("player")
   self.server:setUserValue(user, 'player_uuid', player_uuid)
   self.currentGamestate:updateState(player_uuid, "x", 0)
   self.currentGamestate:updateState(player_uuid, "y", 0)
   local serialized_state = self.currentGamestate:serialize()
   self.server:send(COMMANDS.full_update, serialized_state)
+end
+
+-------------------------------------------------
+-- Removes user from server game representation.
+-- @tparam tab user User who left the game.
+-------------------------------------------------
+function Server:userDisconnected(user)
+  self.currentGamestate:removeFromState(user.customData.player_uuid)
 end
 
 -------------------------------------------------

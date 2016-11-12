@@ -1,7 +1,7 @@
 -------------------------------------------------
 -- Base entity class for Perimo
 --
--- @classmod Animation
+-- @classmod Entity
 -- @author Julian Meyer
 -- @copyright Julian Meyer 2016
 -------------------------------------------------

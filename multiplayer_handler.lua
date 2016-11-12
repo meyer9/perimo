@@ -16,6 +16,7 @@ local COMMANDS = require('common.commands')
 local Gamestate = require('common.gamestate')
 local GamestateRunner = require('common.gamestate_runner')
 local messagepack = require('msgpack.MessagePack')
+local MultiplayerEntities = require 'multiplayer_entities'
 
 local Multiplayer = class('Multiplayer', Entity)
 
@@ -29,8 +30,9 @@ function Multiplayer:load()
   self.tick = 0
   self.time_since_dt = socket.gettime()
   self.last_tick = 0
-  self.needs_update = {}
   self.gamestate_runner = GamestateRunner:new(self.game.tickrate)
+  self.multiplayer_entities = MultiplayerEntities:new()
+  self:addSubentity(self.multiplayer_entities)
 end
 
 -------------------------------------------------
@@ -93,6 +95,7 @@ end
 -- @tparam string parms Parameters received.
 -------------------------------------------------
 function Multiplayer:received(cmd, parms)
+  local player_uuid = self.client:getUserValue("player_uuid")
   if cmd == COMMANDS['map'] then
     print("Loaded map...")
     self.superentity.map:deserialize(parms)
@@ -100,8 +103,10 @@ function Multiplayer:received(cmd, parms)
   if cmd == COMMANDS.full_update then
     self.currentGamestate:deserialize(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
-    for entity_id, _ in pairs(messagepack.unpack(parms)) do
-      table.insert(self.needs_update, entity_id)
+    for entity_id, state in pairs(messagepack.unpack(parms)) do
+      if entity_id ~= player_uuid and entity_id ~= "server" then
+        self.multiplayer_entities:addOrUpdate(entity_id, state)
+      end
     end
     self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
     -- print(tick)
@@ -110,8 +115,10 @@ function Multiplayer:received(cmd, parms)
   if cmd == COMMANDS.delta_update then
     self.currentGamestate:deserializeDeltaAndUpdate(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
-    for entity_id, _ in pairs(messagepack.unpack(parms)) do
-      table.insert(self.needs_update, entity_id)
+    for entity_id, state in pairs(messagepack.unpack(parms)) do
+      if entity_id ~= player_uuid and entity_id ~= "server" then
+        self.multiplayer_entities:addOrUpdate(entity_id, state)
+      end
     end
     self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
     if tick then self.tick = tick - 2 end
@@ -145,7 +152,6 @@ function Multiplayer:update(dt)
   -- print("Multiplayer update: time: " .. math.floor(self.tick) .. ', ' .. self.tick)
   if self.last_tick ~= math.floor(self.tick) then
     self.last_tick = math.floor(self.tick)
-    self.needs_update = {}
     self.game:call_mpTick()
   end
   self.client:update(dt)

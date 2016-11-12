@@ -71,10 +71,16 @@ function Gamestate:delta(old_gamestate)
   local delta = {}
   for k, v in pairs(self._state) do
     for key, value in pairs(v) do
-      -- print(k, key, value)
       if not old_state[k] or old_state[k][key] ~= self._state[k][key] then
         if not delta[k] then delta[k] = {} end
         delta[k][key] = self._state[k][key]
+      end
+    end
+  end
+  if #old_state ~= #self._state then
+    for k, v in pairs(old_state) do
+      if old_gamestate[k] and not self._state[k] then
+        delta[k] = "remove"
       end
     end
   end
@@ -120,9 +126,13 @@ end
 -------------------------------------------------
 function Gamestate:deltaUpdate(delta)
   for entity_uuid, props in pairs(delta) do
-    for prop, val in pairs(props) do
-      if self._state[entity_uuid] == nil then self._state[entity_uuid] = {} end
-      self._state[entity_uuid][prop] = val
+    if props == "remove" then
+      self._state[entity_uuid] = nil
+    else
+      for prop, val in pairs(props) do
+        if self._state[entity_uuid] == nil then self._state[entity_uuid] = {} end
+        self._state[entity_uuid][prop] = val
+      end
     end
   end
 end
@@ -171,12 +181,17 @@ end
 -- Adds and object to the state and returns its
 -- UUID.
 --
+-- @tparam string type type of object to create
 -- @treturn UUID of newly created object
 -------------------------------------------------
-function Gamestate:addObject()
+function Gamestate:addObject(type)
   objectUUID = uuid()
-  self._state[objectUUID] = {}
+  self._state[objectUUID] = {type=type}
   return objectUUID
+end
+
+function Gamestate:removeFromState(uuid)
+  self._state[uuid] = nil
 end
 
 return Gamestate
