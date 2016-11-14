@@ -21,12 +21,11 @@ local GamestateRunner = class('GamestateRunner')
 -- Constructor function of GamestateRunner module
 --
 -- @tparam int tickrate the tick rate of the client
--- @tparam int max_frames the max frames the client should keep track of
 -------------------------------------------------
-function GamestateRunner:initialize(tickrate, max_frames)
+function GamestateRunner:initialize(tickrate)
   self.state_history = {}
   self.command_history = {}
-  self.max_frames = 3 or max_frames
+  self.max_frames = 10
   self.tickrate = tickrate
 end
 
@@ -37,11 +36,11 @@ end
 -- @treturn Gamestate predicted gamestate of client at latest tick
 -------------------------------------------------
 function GamestateRunner:run()
-  if #self.state_history then
+  if #self.state_history == 0 then
     return Gamestate:new()
   end
   if #self.command_history == 0 then
-    return self.from_state
+    return self.state_history[#self.state_history]
   end
   local last_gamestate = self.state_history[#self.state_history]
   local new_gamestate = last_gamestate:clone()
@@ -111,14 +110,17 @@ function GamestateRunner:getFrameProp(entity, property, exactTick)
     end
   end
   if bestInterpAmountEnd == 99999 then
-    interpEnd = self:run()
+    local interpEnd = self:run()
   end
   if interpEnd and interpStart then
-    local percentBetween = (interpEnd:getTick() - exactTick) / (interpEnd:getTick() - interpStart:getTick())
+    -- print("From: ", interpStart:getTick())
+    -- print("To: ", interpEnd:getTick())
+    -- print(exactTick)
+    local percentBetween = (exactTick - interpStart:getTick()) / (interpEnd:getTick() - interpStart:getTick())
     local propStart = interpStart:getObjectProp(entity, property)
     local propEnd = interpEnd:getObjectProp(entity, property)
     if propStart and propEnd then
-      return Util.lerp(propEnd, propStart, percentBetween)
+      return Util.lerp(propStart, propEnd, percentBetween)
     else
       return nil
     end

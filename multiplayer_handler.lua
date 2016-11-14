@@ -109,7 +109,7 @@ function Multiplayer:received(cmd, parms)
       end
     end
     self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
-    -- print(tick)
+
     if tick then self.tick = tick - 2 end
   end
   if cmd == COMMANDS.delta_update then
@@ -121,7 +121,10 @@ function Multiplayer:received(cmd, parms)
       end
     end
     self.gamestate_runner:receivedUpdate(self.currentGamestate, tick)
-    if tick then self.tick = tick - 2 end
+    -- local difference = socket.gettime() - self.currentGamestate:getObjectProp('server', 'timestamp')
+    if tick then
+      self.tick = tick - 2
+    end
   end
 end
 

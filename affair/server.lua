@@ -69,17 +69,24 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	o.bitsInLastSecond = 0
 	o.secondsLeft = 1
 	o.tick = 0
-	o.tickrate = 2
+	o.tickrate = 16
+	o.start_time = socket.gettime()
+	o.last_tick = 0
 	o.time = 0
 
 	return o
 end
 
+function Server:getTick()
+  local dt = socket.gettime() - self.start_time
+  return self.tick + (dt * self.tickrate)
+end
+
 function Server:update( dt )
-	self.time = self.time + dt
-	if self.time > self.tick / self.tickrate then
-		self.tick = self.tick + 1
-		self.callbacks.tick(self.tick)
+	local tick = self:getTick()
+	if math.floor(tick) ~= self.last_tick then
+		self.last_tick = math.floor(tick)
+		self.callbacks.tick(math.floor(tick))
 	end
 
 	self.secondsLeft = self.secondsLeft - dt

@@ -13,6 +13,7 @@ local class = require('middleclass')
 local uuid = require('uuid')
 local util = require('util')
 local messagepack = require('msgpack.MessagePack')
+local socket = require('socket')
 
 local Gamestate = class('Gamestate')
 
@@ -34,6 +35,7 @@ end
 -------------------------------------------------
 function Gamestate:serialize()
   -- util.print_r(self._state)
+  self._state.server.timestamp = socket.gettime()
   return messagepack.pack(self._state)
 end
 
@@ -96,6 +98,7 @@ end
 -------------------------------------------------
 function Gamestate:deltaSerialize(old_gamestate)
   local delta = self:delta(old_gamestate)
+  delta.server.timestamp = socket.gettime()
   return messagepack.pack(delta)
 end
 
