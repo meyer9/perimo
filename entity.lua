@@ -55,7 +55,7 @@ end
 function Entity:call_load()
   self:load()
   if self.subentities then
-    for objectId, subentity in ipairs(self.subentities) do
+    for objectId, subentity in pairs(self.subentities) do
       if subentity ~= nil then
         subentity:call_load()
       end
@@ -69,7 +69,7 @@ end
 -------------------------------------------------
 function Entity:call_update(dt)
   if self.subentities then
-    for objectId, subentity in ipairs(self.subentities) do
+    for objectId, subentity in pairs(self.subentities) do
       if subentity ~= nil then
         subentity:call_update(dt)
       end
@@ -84,7 +84,7 @@ end
 function Entity:call_draw()
   self:draw()
   if self.subentities then
-    for objectId, subentity in ipairs(self.subentities) do
+    for objectId, subentity in pairs(self.subentities) do
       if subentity ~= nil then
         subentity:call_draw()
       end
@@ -124,7 +124,7 @@ end
 function Entity:call_mpTick()
   self:mpTick()
   if self.subentities then
-    for objectId, subentity in ipairs(self.subentities) do
+    for objectId, subentity in pairs(self.subentities) do
       if subentity ~= nil then
         subentity:call_mpTick()
       end

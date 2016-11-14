@@ -150,7 +150,7 @@ local DefaultMixin = {
 
     include = function(self, ...)
       assert(type(self) == 'table', "Make sure you that you are using 'Class:include' instead of 'Class.include'")
-      for _,mixin in ipairs({...}) do _includeMixin(self, mixin) end
+      for _,mixin in pairs({...}) do _includeMixin(self, mixin) end
       return self
     end
   }

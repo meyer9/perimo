@@ -73,7 +73,7 @@ function Util.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 -- @treturn bool Whether tab contains val.
 -------------------------------------------------
 function Util.has_value (tab, val)
-    for index, value in ipairs (tab) do
+    for index, value in pairs (tab) do
         if value == val then
             return true
         end
@@ -89,7 +89,7 @@ end
 -- @treturn bool false if value not found.
 -------------------------------------------------
 function Util.remove_value (tab, val)
-    for index, value in ipairs (tab) do
+    for index, value in pairs (tab) do
         if value == val then
             table.remove(tab, index)
         end

@@ -370,10 +370,10 @@ function advertise:getServerList( where )
 
 	if string.lower( where ) == "both" then
 		local t = {}
-		for k, v in ipairs( listLAN ) do
+		for k, v in pairs( listLAN ) do
 			t[k] = v
 		end
-		for k, v in ipairs( listOnline ) do
+		for k, v in pairs( listOnline ) do
 			t[k + #listLAN] = v
 		end
 		return t
