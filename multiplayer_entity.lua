@@ -10,6 +10,8 @@ local class = require 'middleclass'
 local Entity = require 'entity'
 local util = require 'util'
 
+log = require 'common.log'
+
 local MultiplayerEntity = class('MultiplayerEntity', Entity)
 
 -------------------------------------------------
@@ -27,8 +29,7 @@ end
 -- @tparam tab state State to update using.
 -------------------------------------------------
 function MultiplayerEntity:updateState(state)
-  print('Not overrided')
-  if state.type then print(state.type) end
+  log.warn('Not implemented: ' .. state.type)
 end
 
 return MultiplayerEntity

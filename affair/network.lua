@@ -1,11 +1,15 @@
 local BASE = (...):match("(.-)[^%.]+$")
 local BASE_SLASH = BASE:sub(1,#BASE-1) .. "/"
 
-local Server = require( BASE .. "server" )
-local Client = require( BASE .. "client" )
+package.path = package.path .. ";../?.lua" -- include from top directory
+
+local Server = require( "affair.server" )
+local Client = require( "affair.client" )
 
 -- Load advertising (serverlist) submodule
-local advertise = require( BASE .. "advertise" )
+local advertise = require( "affair.advertise" )
+
+log = require 'common.log'
 
 local network = {}
 
@@ -39,11 +43,11 @@ end
 function network:startClient( address, playername, port, authMsg )
 
 	if not address or #address == 0 then
-		print("[NET] No address found. Using default: 'localhost'")
+		log.warn("[NET] No address found. Using default: 'localhost'")
 		address = "localhost"
 	end
 
-	print( "[NET] Connecting to:", address, port, authMsg)
+	log.info( "[NET] Connecting to:", address, port, authMsg)
 
 	local createClient = function()
 		return Client:new( address, port or PORT, playername, authMsg )
@@ -60,7 +64,7 @@ function network:startClient( address, playername, port, authMsg )
 end
 
 function network:closeConnection()
-	print("[NET] Closing all connections.")
+	log.error("[NET] Closing all connections.")
 	if client then
 		client:close()
 	end

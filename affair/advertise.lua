@@ -1,8 +1,12 @@
 -- A submodule used for telling clients about a server.
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Get the path to this script:
 local BASE = (...):match("(.-)[^%.]+$")
 local BASE_SLASH = BASE:sub(1,#BASE-1) .. "/"
+
+log = require 'common.log'
 
 local advertise = {
 	portUDP = 3410,
@@ -88,7 +92,7 @@ function advertise:start( server, where )
 		self.advertiseUDP:settimeout(0)
 		self.advertiseUDP:setsockname('*', self.portUDP)
 		self.advertiseUDP:setoption("broadcast", true)
-		print("[ADVERTISE] Advertising server in LAN. UDP Port: " .. self.portUDP)
+		log.info("[ADVERTISE] Advertising server in LAN. UDP Port: " .. self.portUDP)
 	end
 
 	if self.advertiseOnline then
@@ -110,14 +114,14 @@ function advertise:start( server, where )
 
 			advertiseOnlineThread:start( advertiseOnlineCin, advertiseOnlineCout )
 		end
-		print("[ADVERTISE] Advertising server online.")
+		log.info("[ADVERTISE] Advertising server online.")
 	end
 end
 
 function advertise:stop()
 
 	if self.advertiseLAN or self.advertiseOnline then
-		print("[ADVERTISE] Stopped advertising the server.")
+		log.warn("[ADVERTISE] Stopped advertising the server.")
 	end
 
 	if self.advertiseLAN then
@@ -164,7 +168,7 @@ function advertise:request( where )
 		self.requestUDP:setoption('broadcast',true)
 		self.requestUDP:sendto( "ServerlistRequest|" .. self.ID .. "\n",
 				"255.255.255.255", self.portUDP)
-		print( "[REQUEST] Requested LAN servers. UDP Port: " .. self.portUDP )
+		log.info( "[REQUEST] Requested LAN servers. UDP Port: " .. self.portUDP )
 	end
 
 	if self.requestOnline then
@@ -180,7 +184,7 @@ function advertise:request( where )
 		requestOnlineCout = love.thread.newChannel()
 
 		requestOnlineThread:start( requestOnlineCout, self.url, self.ID )
-		print( "[REQUEST] Requested online servers." )
+		log.info( "[REQUEST] Requested online servers." )
 	end
 end
 
@@ -211,7 +215,7 @@ function advertise:update( dt )
 				if id and id == self.ID then
 					self.advertiseUDP:sendto( "ServerlistReply|" .. self.ID .. "|" .. self.port ..
 							"|" .. self.serverInfo .. "\n", ip, port )
-					print("[ADVERTISE] Received LAN request. Game ID matched. Answered request.")
+					log.info("[ADVERTISE] Received LAN request. Game ID matched. Answered request.")
 				end
 			end
 		end
@@ -229,7 +233,7 @@ function advertise:update( dt )
 		local msg = advertiseOnlineCout:pop()
 		if msg then
 			if msg ~= "closed" then
-				print("[ADVERTISE] " .. msg)
+				log.info("[ADVERTISE] " .. msg)
 				if self.callbacks.advertiseWarnings then
 					self.callbacks.advertiseWarnings( msg )
 				end
@@ -240,7 +244,7 @@ function advertise:update( dt )
 		if advertiseOnlineThread then
 			local err = advertiseOnlineThread:getError()
 			if err then
-				print("[ADVERTISE] " .. err)
+				log.info("[ADVERTISE] " .. err)
 				advertiseOnlineThread = nil
 			end
 		end
@@ -260,7 +264,7 @@ function advertise:update( dt )
 			-- Check for errors:
 			local err = requestOnlineThread:getError()
 			if err then
-				print("THREAD ERROR: " .. err)
+				log.fatal("THREAD ERROR: " .. err)
 				requestOnlineThread = nil
 				if self.callbacks.requestWarnings then
 					self.callbacks.requestWarnings( err )
@@ -359,7 +363,7 @@ function advertise:parseOnlineServerEntry( msg )
 			end
 			return true
 		else
-			print("[ADVERTISE] Reply:", msg )
+			log.info("[ADVERTISE] Reply:", msg )
 		end
 	end
 	return false

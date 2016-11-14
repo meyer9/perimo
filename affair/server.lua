@@ -7,6 +7,7 @@ local User = require( BASE .. "user" )
 local CMD = require( BASE .. "commands" )
 package.path = package.path .. ";../?.lua"
 local Util = require('util')
+log = require 'common.log'
 
 --local advertiseLAN = require( BASE_SLASH .. "serverlist/advertiseLAN" )
 
@@ -34,11 +35,11 @@ function Server:new( maxNumberOfPlayers, port, pingTime, portUDP )
 	local o = {}
 	setmetatable( o, self )
 
-	print("[NET] Initialising Server...")
+	log.info("[NET] Initialising Server...")
 	o.conn = assert(socket.bind("*", port))
 	o.conn:settimeout(0)
 	if o.conn then
-		print("[NET]\t-> started.")
+		log.info("[NET]\t-> started.")
 	end
 
 	o.connUDP = assert(socket.udp())
@@ -91,7 +92,7 @@ function Server:update( dt )
 
 	self.secondsLeft = self.secondsLeft - dt
 	if self.secondsLeft <= 0 then
-		print("Packets per second: " .. self.bitsInLastSecond)
+		log.debug("Packets per second: " .. self.bitsInLastSecond)
 		self.bitsInLastSecond = 0
 		self.secondsLeft = 1
 	end
@@ -113,7 +114,7 @@ function Server:update( dt )
 
 			self:newUser( newUser )
 
-			print( "[NET] Client attempting to connect (" .. id .. ")" )
+			log.info( "[NET] Client attempting to connect (" .. id .. ")" )
 		end
 
 		for k, u in pairs(userList) do
@@ -138,7 +139,7 @@ function Server:update( dt )
 						userListByName[ u.playerName ] = nil
 					end
 				else
-					print("[NET] Err Received:", msg, data)
+					log.error("[NET] Err Received:", msg, data)
 				end
 			end
 
@@ -186,9 +187,7 @@ function Server:update( dt )
 		end
 
 	end
-	-- print(self.conn, self.connUDP)
 	if self.connUDP then
-		-- Util.print_r(authKeyAssoc)
 		msg, ip, port = self.connUDP:receivefrom()
 		if msg then
 			authKey, command, content = string.match( msg, "(%d+)|(.)(.*)")
@@ -315,7 +314,7 @@ function Server:synchronizeUser( user )
 	-- Send this new user to the user as well (let him know about himself)
 	self:send( CMD.NEW_PLAYER, user.id .. "|" .. user.playerName, user )
 
-	print("[NET] New Client! (" .. numberOfUsers .. ")" )
+	log.info("[NET] New Client! (" .. numberOfUsers .. ")" )
 end
 
 
@@ -329,7 +328,6 @@ function Server:send( command, msg, user, udp )
 		else
 			for k, u in pairs( userList ) do
 				if u.port and u.ip then
-					-- print("send to all:", u.ip, u.port)
 					self.connUDP:sendto( fullMsg, u.ip, u.port )
 				end
 			end
@@ -396,14 +394,14 @@ function Server:disconnectedUser( user )
 	-- If the other clients already know about this client,
 	-- then tell them to delete him.
 	if user.synchronized then
-		print("[NET] Client left (" .. user.id .. ")" )
+		log.info("[NET] Client left (" .. user.id .. ")" )
 		self:send( CMD.PLAYER_LEFT, tostring(user.id) )
 
 		if self.callbacks.disconnectedUser then
 			self.callbacks.disconnectedUser( user )
 		end
 	else
-		print("[NET] Client left before synchronizing (" .. user.id .. ")" )
+		log.warn("[NET] Client left before synchronizing (" .. user.id .. ")" )
 		if self.callbacks.disconnectedUnsynchedUser then
 			self.callbacks.disconnectedUnsynchedUser( user )
 		end

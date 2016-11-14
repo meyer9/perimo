@@ -113,9 +113,6 @@ function GamestateRunner:getFrameProp(entity, property, exactTick)
     local interpEnd = self:run()
   end
   if interpEnd and interpStart then
-    -- print("From: ", interpStart:getTick())
-    -- print("To: ", interpEnd:getTick())
-    -- print(exactTick)
     local percentBetween = (exactTick - interpStart:getTick()) / (interpEnd:getTick() - interpStart:getTick())
     local propStart = interpStart:getObjectProp(entity, property)
     local propEnd = interpEnd:getObjectProp(entity, property)

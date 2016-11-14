@@ -34,7 +34,6 @@ end
 -- @treturn string serialized gamestate
 -------------------------------------------------
 function Gamestate:serialize()
-  -- util.print_r(self._state)
   self._state.server.timestamp = socket.gettime()
   return messagepack.pack(self._state)
 end
@@ -45,7 +44,6 @@ end
 -- @tparam string packed_state Serialized gamestate
 -------------------------------------------------
 function Gamestate:deserialize(packed_state)
-  -- print(packed_state)
   self._state = messagepack.unpack(packed_state)
   self.updated = true
 end

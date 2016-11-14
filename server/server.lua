@@ -18,6 +18,8 @@ local COMMANDS = require('common.commands')
 local Map = require('common.map')
 local Gamestate = require('common.gamestate')
 
+log = require 'common.log'
+
 local Server = class('Server')
 
 uuid.seed()
@@ -85,9 +87,9 @@ function Server:initialize()
 
   self.map = Map:new(200, 200)
 
-  print("Generating map...")
+  log.debug("Generating map...")
   self.map:generate_island()
-  print("Finished.")
+  log.debug("Finished.")
 
   self.dt = 0
   self.time = socket.gettime()

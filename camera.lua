@@ -192,7 +192,6 @@ function camera:lockWindow(x, y, x_min, x_max, y_min, y_max, smoother, ...)
 	-- figure out displacement in camera coordinates
 	x,y = self:cameraCoords(x,y)
 	local dx, dy = 0,0
-	-- print(x, x_min, y, y_min)
 	if x < x_min then
 		dx = x - x_min
 	elseif x > x_max then

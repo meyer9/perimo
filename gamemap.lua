@@ -140,7 +140,6 @@ function GameMap:draw()
             self:drawTile(tile_to_draw, x, y)
           end
         end
-        -- print(tile_to_draw)
       end
     end
   end

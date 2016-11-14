@@ -19,7 +19,6 @@ function utility:lengthToHeader( len )
 	len = len - h2*b2
 	local h3 = math.floor(len/b3)
 	len = len - h3*b3
-	--print("\t",255, h1, h2, h3, len)
 	return string.char(255,h1,h2,h3,len)
 end
 

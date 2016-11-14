@@ -1,12 +1,13 @@
-
-local BASE = (...):match("(.-)[^%.]+$")
+package.path = package.path .. ";../?.lua" -- include from top directory
 
 local socket = require("socket")
 
-local User = require( BASE .. "user" )
-local CMD = require( BASE .. "commands" )
+local User = require( "affair.user" )
+local CMD = require( "affair.commands" )
 
-local utility = require( BASE .. "utility" )
+local utility = require( "affair.utility" )
+
+log = require 'common.log'
 
 local Client = {}
 Client.__index = Client
@@ -23,7 +24,7 @@ function Client:new( address, port, playerName, authMsg, portUDP )
 
 	authMsg = authMsg or ""
 
-	print("[NET] Initialising Client...")
+	log.info("[NET] Initialising Client...")
 	o.conn = socket.tcp()
 	o.conn:settimeout(5)
 
@@ -37,7 +38,7 @@ function Client:new( address, port, playerName, authMsg, portUDP )
 	if ok and o.conn then
 		o.conn:settimeout(0)
 		self.send( o, CMD.AUTHORIZATION_REQUREST, authMsg )
-		print("[NET] -> Client connected", o.conn)
+		log.info("[NET] -> Client connected", o.conn)
 	else
 		o.conn = nil
 		return nil
@@ -74,12 +75,6 @@ end
 
 function Client:update( dt )
 	if self.conn then
-		-- self.nextSec = self.nextSec - dt
-		-- if self.nextSec <= 0 then
-		-- 	print(self.bps)
-		-- 	self.bps = 0
-		-- 	self.nextSec = 1
-		-- end
 		local data, msg, partOfLine = self.conn:receive( 9999 )
 		if data then
 			partMessage = partMessage .. data
@@ -90,14 +85,14 @@ function Client:update( dt )
 				end
 			elseif msg == "closed" then
 				--self.conn:shutdown()
-				print("[NET] Disconnected.")
+				log.warn("[NET] Disconnected.")
 				if self.callbacks.disconnected then
 					self.callbacks.disconnected( self.kickMsg )
 				end
 				self.conn = nil
 				return false
 			else
-				print("[NET] Err Received:", msg, data)
+				log.error("[NET] Err Received:", msg, data)
 			end
 		end
 
@@ -127,36 +122,6 @@ function Client:update( dt )
 				messageLength = nil
 			end
 		end
-
-
-		--[[if data then
-			if #partMessage > 0 then
-				data = partMessage .. data
-				partMessage = ""
-			end
-
-			-- First letter stands for the command:
-			command, content = string.match(data, "(.)(.*)")
-			command = string.byte( command )
-
-			self:received( command, content )
-		else
-			if msg == "timeout" then	-- only part of the message could be received
-				if #partOfLine > 0 then
-					partMessage = partMessage .. partOfLine
-				end
-			elseif msg == "closed" then
-				--self.conn:shutdown()
-				print("[NET] Disconnected.")
-				if self.callbacks.disconnected then
-					self.callbacks.disconnected( self.kickMsg )
-				end
-				self.conn = nil
-				return false
-			else
-				print("[NET] Err Received:", msg, data)
-			end
-		end]]
 	end
 	if self.connUDP then
 		msg, _ = self.connUDP:receive()
@@ -200,11 +165,11 @@ function Client:received( command, msg, udp )
 		self.authKey = tonumber(authKey)
 		if authed == "true" then
 			self.authorized = true
-			print( "[NET] Connection authorized by server." )
+			log.info( "[NET] Connection authorized by server." )
 			-- When authorized, send player name:
 			self:send( CMD.PLAYERNAME, self.playerName )
 		else
-			print( "[NET] Not authorized to join server. Reason: " .. reason )
+			log.error( "[NET] Not authorized to join server. Reason: " .. reason )
 		end
 
 		if self.callbacks.authorized then
@@ -214,7 +179,6 @@ function Client:received( command, msg, udp )
 	elseif command == CMD.PLAYERNAME then
 		local id, playerName, tick, time = string.match( msg, "(.*)|(.*)|(.*)|(.*)" )
 		ticksBetween = (socket.gettime() - time) * self.tickrate
-		-- print(id, playerName, tick)
 		self.playerName = playerName
 		self.clientID = tonumber(id)
 		self.tick = tick + ticksBetween
@@ -222,7 +186,6 @@ function Client:received( command, msg, udp )
 		if self.callbacks.connected then
 			self.callbacks.connected()
 		end
-		--self.conn:settimeout(5)
 	elseif command == CMD.USER_VALUE then
 		local id, keyType, key, valueType, value = string.match( msg, "(.*)|(.*)|(.*)|(.*)|(.*)" )
 		key = stringToType( key, keyType )
@@ -238,7 +201,7 @@ function Client:received( command, msg, udp )
 	elseif command == CMD.KICKED then
 
 		self.kickMsg = msg
-		print("[NET] Kicked from server: " .. msg )
+		log.warn("[NET] Kicked from server: " .. msg )
 
 	elseif self.callbacks.received then
 		self.callbacks.received( command, msg )
@@ -279,7 +242,7 @@ function Client:close()
 	if self.conn then
 		--self.conn:shutdown()
 		self.conn:close()
-		print( "[NET] Closed.")
+		log.warn( "[NET] Closed.")
 	end
 end
 
@@ -298,7 +261,6 @@ end
 function Client:getUserValue( key )
 	if not self.clientID then return nil end
 	local u = userList[self.clientID]
-	-- util.print_r(self.clientID)
 	if u then
 		return u.customData[key]
 	end

@@ -18,6 +18,8 @@ local GamestateRunner = require('common.gamestate_runner')
 local messagepack = require('msgpack.MessagePack')
 local MultiplayerEntities = require 'multiplayer_entities'
 
+log = require 'common.log'
+
 local Multiplayer = class('Multiplayer', Entity)
 
 -------------------------------------------------
@@ -43,11 +45,10 @@ end
 function Multiplayer:connect(host, port)
   if not host then host = 'localhost' end
   if not port then port = 1337 end
-  print('Connecting to ' .. host .. ':' .. port)
+  log.info('Connecting to ' .. host .. ':' .. port)
   self.client, err = network:startClient( host, self.superentity.player.name, port, "authed" )
   if not self.client then
-    print('Failed to connect to ' .. host .. ':' .. port .. '.')
-    print(err)
+    log.error('Failed to connect to ' .. host .. ':' .. port .. '.')
     os.exit()
   end
   function callConnected(...)
@@ -84,7 +85,7 @@ end
 -- Called when client is connected to the server.
 -------------------------------------------------
 function Multiplayer:connected()
-  print('Connected to server.')
+  log.info('Connected to server.')
   self.isConnected = true
   self.client:send(COMMANDS.handshake, nil, true)
 end
@@ -97,7 +98,7 @@ end
 function Multiplayer:received(cmd, parms)
   local player_uuid = self.client:getUserValue("player_uuid")
   if cmd == COMMANDS['map'] then
-    print("Loaded map...")
+    log.debug("Loaded map...")
     self.superentity.map:deserialize(parms)
   end
   if cmd == COMMANDS.full_update then
@@ -152,7 +153,6 @@ function Multiplayer:update(dt)
   local dt = t - self.time_since_dt
   self.time_since_dt = t
   self.tick = self.tick + (dt * self.tickrate)
-  -- print("Multiplayer update: time: " .. math.floor(self.tick) .. ', ' .. self.tick)
   if self.last_tick ~= math.floor(self.tick) then
     self.last_tick = math.floor(self.tick)
     self.game:call_mpTick()
