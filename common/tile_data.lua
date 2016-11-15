@@ -12,106 +12,54 @@ local Tiles = {}
 -- EDIT ONLY BETWEEN HERE
 
 Tiles.ID = {
-  EMPTY = 1,
-  SAND = 2,
-  WATER = 3,
-  TREE = 4,
-  FOLIAGE = 5,
-  GRASS = 6
+  EMPTY = 0,
+  TILE = 1,
+  TILE_CRACKED = 2,
+  BRICK = 3,
+  BRICK_CRACKED = 4,
+  WALL = 5,
+  WALL_LIGHT = 6
 }
 
 Tiles.Data = {
-  [1] = {
+  [0] = {
     width = 32,
     height = 32,
     should_draw = false
   },
+  [1] = {
+    width = 32,
+    height = 32,
+    x = 0,
+    y = 0
+  },
   [2] = {
     width = 32,
     height = 32,
-    x = 128,
-    y = 32,
-    edges = {
-      [3] = {
-        t = {
-          x = 128,
-          y = 0
-        },
-        b = {
-          x = 128,
-          y = 64
-        },
-        l = {
-          x = 96,
-          y = 32
-        },
-        r = {
-          x = 160,
-          y = 32
-        },
-        tl = {
-          x = 96,
-          y = 0
-        },
-        bl = {
-          x = 96,
-          y = 64
-        },
-        tr = {
-          x = 160,
-          y = 0
-        },
-        br = {
-          x = 160,
-          y = 64
-        },
-        dbl = {
-          x = 192,
-          y = 32
-        },
-        dbr = {
-          x = 224,
-          y = 32
-        },
-        dtl = {
-          x = 192,
-          y = 0
-        },
-        dtr = {
-          x = 224,
-          y = 0
-        },
-        tblr = {
-          x = 0,
-          y = 32
-        }
+    x = 32,
+    y = 0,
+    random = {
+      [1] = {
+        x = 64,
+        y = 0
+      },
+      [2] = {
+        x = 96,
+        y = 0
       }
     }
   },
   [3] = {
     width = 32,
     height = 32,
-    x = 0,
-    y = 0,
-    animated = {
-      frames = {
-        [1] = {
-          x = 32,
-          y = 0
-        },
-        [2] = {
-          x = 64,
-          y = 0
-        }
-      },
-      time_between_frames = 0.7
-    }
+    x = 160,
+    y = 0
   },
   [4] = {
-    width = 51,
-    height = 51,
-    x = 1,
-    y = 51,
+    width = 32,
+    height = 32,
+    x = 192,
+    y = 0,
   },
   [5] = {
     x = 52,

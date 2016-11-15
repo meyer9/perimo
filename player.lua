@@ -44,6 +44,7 @@ function Player:load()
   self.reload = 1000
   self.toReload = self.reload
   self.playerFont = love.graphics.newFont(10)
+  self.rot = 0
 end
 
 -------------------------------------------------
@@ -59,6 +60,8 @@ function Player:update(dt)
     self.x = interpX
     self.y = interpY
   end
+  local mousePositionX, mousePositionY = self.game.camera:mousePosition()
+  self.rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
 end
 
 -------------------------------------------------
@@ -76,6 +79,9 @@ function Player:mpTick()
     elseif love.keyboard.isDown("d") then
       self.game.multiplayer:sendCommand("right", nil, true)
     end
+    local mousePositionX, mousePositionY = self.game.camera:mousePosition()
+    local rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
+    self.game.multiplayer:sendCommand("look", rot, true)
   end
 end
 
@@ -85,13 +91,10 @@ end
 function Player:draw()
   -- draw torso
 
-  local mousePositionX, mousePositionY = self.game.camera:mousePosition()
-  local rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
-
   local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
 
   love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 2, 2, 8, 8)
-  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, rot, 2, 2, 8, 8)
+  love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, self.rot, 2, 2, 8, 8)
   love.graphics.setFont(self.playerFont)
   love.graphics.printf(self.name, self.x - 250, self.y + 16, 500, 'center')
 

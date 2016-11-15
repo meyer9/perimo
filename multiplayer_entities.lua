@@ -10,6 +10,7 @@ local class = require 'middleclass'
 local Entity = require 'entity'
 local MultiplayerEntity = require 'multiplayer_entity'
 local MultiplayerPlayer = require 'multiplayer_player'
+local util = require 'util'
 
 local MultiplayerEntities = class('MultiplayerEntities', Entity)
 

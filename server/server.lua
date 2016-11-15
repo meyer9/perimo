@@ -108,6 +108,7 @@ function Server:userFullyConnected(user)
   self.server:setUserValue(user, 'player_uuid', player_uuid)
   self.currentGamestate:updateState(player_uuid, "x", 0)
   self.currentGamestate:updateState(player_uuid, "y", 0)
+  self.currentGamestate:updateState(player_uuid, "name", user.playerName)
   local serialized_state = self.currentGamestate:serialize()
   self.server:send(COMMANDS.full_update, serialized_state)
 end
@@ -152,6 +153,8 @@ function Server:handle_message(cmd, parms, user)
     elseif cmd == COMMANDS.right then
       local currentX = self.currentGamestate:getObjectProp(player_uuid, "x")
       self.currentGamestate:updateState(player_uuid, "x", currentX + 100 * dt)
+    elseif cmd == COMMANDS.look then
+      self.currentGamestate:updateState(player_uuid, "yaw", tonumber(parms))
     end
   end
 end

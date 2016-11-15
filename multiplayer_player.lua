@@ -24,6 +24,8 @@ end
 function MultiplayerEntity:updateState(state)
   if state.x then self.x = state.x end
   if state.y then self.y = state.y end
+  if state.yaw then self.rot = state.yaw end
+  if state.name then self.name = state.name end
 end
 
 function MultiplayerPlayer:draw()

@@ -16,6 +16,7 @@ COMMANDS = {
   right = 17,
   delta_update = 18,
   full_update = 19,
+  look = 20,
   handshake = 255
 }
 
