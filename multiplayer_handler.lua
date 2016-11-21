@@ -8,14 +8,14 @@
 
 -- Local Imports
 local class = require 'middleclass'
-local network = require 'affair.network'
+local network = require 'lib.affair.network'
 local Entity = require 'entity'
-local uuid = require 'uuid'
+local uuid = require 'lib.uuid'
 local util = require 'util'
 local COMMANDS = require('common.commands')
 local Gamestate = require('common.gamestate')
 local GamestateRunner = require('common.gamestate_runner')
-local messagepack = require('msgpack.MessagePack')
+local messagepack = require('lib.msgpack.MessagePack')
 local MultiplayerEntities = require 'multiplayer_entities'
 
 log = require 'common.log'

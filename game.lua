@@ -14,7 +14,7 @@ local Entity = require 'entity'
 local GameMap = require 'gamemap'
 local Multiplayer = require 'multiplayer_handler'
 local Player = require 'player'
-local Camera = require 'camera'
+local Camera = require 'lib.camera'
 
 
 local Game = class('Game', Entity)

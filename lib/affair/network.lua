@@ -3,11 +3,11 @@ local BASE_SLASH = BASE:sub(1,#BASE-1) .. "/"
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
-local Server = require( "affair.server" )
-local Client = require( "affair.client" )
+local Server = require( "lib.affair.server" )
+local Client = require( "lib.affair.client" )
 
 -- Load advertising (serverlist) submodule
-local advertise = require( "affair.advertise" )
+local advertise = require( "lib.affair.advertise" )
 
 log = require 'common.log'
 

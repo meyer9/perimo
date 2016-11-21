@@ -2,10 +2,10 @@ package.path = package.path .. ";../?.lua" -- include from top directory
 
 local socket = require("socket")
 
-local User = require( "affair.user" )
-local CMD = require( "affair.commands" )
+local User = require( "lib.affair.user" )
+local CMD = require( "lib.affair.commands" )
 
-local utility = require( "affair.utility" )
+local utility = require( "lib.affair.utility" )
 
 log = require 'common.log'
 

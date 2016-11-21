@@ -10,9 +10,9 @@
 package.path = package.path .. ";../?.lua" -- include from top directory
 
 local class = require('middleclass')
-local uuid = require('uuid')
+local uuid = require('lib.uuid')
 local util = require('util')
-local messagepack = require('msgpack.MessagePack')
+local messagepack = require('lib.msgpack.MessagePack')
 local socket = require('socket')
 
 local Gamestate = class('Gamestate')
