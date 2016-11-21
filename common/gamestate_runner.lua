@@ -1,5 +1,5 @@
 -------------------------------------------------
--- A module to keep track of gamestates received by the server
+-- A module to keep track of gamestates
 -- and interpolate between them.
 --
 -- @classmod GamestateRunner
@@ -29,6 +29,42 @@ function GamestateRunner:initialize(tickrate)
   self.tickrate = tickrate
 end
 
+
+-------------------------------------------------
+-- Runs commnd using the previous gamestate acting directly on it.
+-- Note that this function does not clone the gamestate before operating on it.
+--
+-- @tparam Gamestate new_gamestate Gamestate to operate on
+-- @tparam tab command_and_player Command information
+-- @treturn Gamestate predicted gamestate of client at latest tick
+-------------------------------------------------
+function GamestateRunner.run_command_on_gamestate(new_gamestate, command_and_player, tickrate, skip_tick)
+  local cmd = command_and_player.cmd
+  local player_uuid = command_and_player.player
+  local params = command_and_player.params
+  if not skip_tick then
+    local tick = command_and_player.tick
+    if tick > new_gamestate:getObjectProp('server', 'tick') then
+      new_gamestate:updateState('server', 'tick', tick)
+    end
+  end
+  if cmd == COMMANDS.forward then
+    local currentY = new_gamestate:getObjectProp(player_uuid, "y")
+    new_gamestate:updateState(player_uuid, "y", currentY - 100 / tickrate)
+  elseif cmd == COMMANDS.backward then
+    local currentY = new_gamestate:getObjectProp(player_uuid, "y")
+    new_gamestate:updateState(player_uuid, "y", currentY + 100 / tickrate)
+  end
+  if cmd == COMMANDS.left then
+    local currentX = new_gamestate:getObjectProp(player_uuid, "x")
+    new_gamestate:updateState(player_uuid, "x", currentX - 100 / tickrate)
+  elseif cmd == COMMANDS.right then
+    local currentX = new_gamestate:getObjectProp(player_uuid, "x")
+    new_gamestate:updateState(player_uuid, "x", currentX + 100 / tickrate)
+  end
+  return new_gamestate
+end
+
 -------------------------------------------------
 -- Runs gamestate based on latest tick from server and
 -- past client commands
@@ -45,27 +81,7 @@ function GamestateRunner:run()
   local last_gamestate = self.state_history[#self.state_history]
   local new_gamestate = last_gamestate:clone()
   for idx, command_and_player in pairs(self.command_history) do
-    local cmd = command_and_player.cmd
-    local player_uuid = command_and_player.player
-    local params = command_and_player.params
-    local tick = command_and_player.tick
-    if tick > new_gamestate:getObjectProp('server', 'tick') then
-      new_gamestate:updateState('server', 'tick', tick)
-    end
-    if cmd == COMMANDS.forward then
-      local currentY = new_gamestate:getObjectProp(player_uuid, "y")
-      new_gamestate:updateState(player_uuid, "y", currentY - 100 / self.tickrate)
-    elseif cmd == COMMANDS.backward then
-      local currentY = new_gamestate:getObjectProp(player_uuid, "y")
-      new_gamestate:updateState(player_uuid, "y", currentY + 100 / self.tickrate)
-    end
-    if cmd == COMMANDS.left then
-      local currentX = new_gamestate:getObjectProp(player_uuid, "x")
-      new_gamestate:updateState(player_uuid, "x", currentX - 100 / self.tickrate)
-    elseif cmd == COMMANDS.right then
-      local currentX = new_gamestate:getObjectProp(player_uuid, "x")
-      new_gamestate:updateState(player_uuid, "x", currentX + 100 / self.tickrate)
-    end
+    self.run_command_on_gamestate(new_gamestate, command_and_player, self.tickrate)
     self.command_history[idx] = nil
   end
   return new_gamestate

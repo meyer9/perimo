@@ -17,6 +17,7 @@ local util = require('common.util')
 local COMMANDS = require('common.commands')
 local Map = require('common.map')
 local Gamestate = require('common.gamestate')
+local GamestateRunner = require('common.gamestate_runner')
 
 log = require 'common.log'
 
@@ -137,25 +138,13 @@ end
 -- @tparam tab user User data of client sending data.
 -------------------------------------------------
 function Server:handle_message(cmd, parms, user)
-  local player_uuid = user.customData.player_uuid
   local dt = 1 / self.server.tickrate
-  if player_uuid then
-    if cmd == COMMANDS.forward then
-      local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
-      self.currentGamestate:updateState(player_uuid, "y", currentY - 100 * dt)
-    elseif cmd == COMMANDS.backward then
-      local currentY = self.currentGamestate:getObjectProp(player_uuid, "y")
-      self.currentGamestate:updateState(player_uuid, "y", currentY + 100 * dt)
-    end
-    if cmd == COMMANDS.left then
-      local currentX = self.currentGamestate:getObjectProp(player_uuid, "x")
-      self.currentGamestate:updateState(player_uuid, "x", currentX - 100 * dt)
-    elseif cmd == COMMANDS.right then
-      local currentX = self.currentGamestate:getObjectProp(player_uuid, "x")
-      self.currentGamestate:updateState(player_uuid, "x", currentX + 100 * dt)
-    elseif cmd == COMMANDS.look then
-      self.currentGamestate:updateState(player_uuid, "yaw", tonumber(parms))
-    end
+  local command_and_player = {}
+  if user.customData.player_uuid then
+    command_and_player.player = user.customData.player_uuid
+    command_and_player.cmd = cmd
+    command_and_player.parms = parms
+    GamestateRunner.run_command_on_gamestate(self.currentGamestate, command_and_player, self.server.tickrate, true)
   end
 end
 
