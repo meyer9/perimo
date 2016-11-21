@@ -10,10 +10,10 @@
 package.path = package.path .. ";../?.lua" -- include from top directory
 
 
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 local Gamestate = require 'common.gamestate'
 local COMMANDS = require 'common.commands'
-local Util = require 'util'
+local Util = require 'common.util'
 
 local GamestateRunner = class('GamestateRunner')
 

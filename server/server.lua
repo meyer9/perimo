@@ -9,10 +9,10 @@
 package.path = package.path .. ";../?.lua" -- include from top directory
 
 local network = require('lib.affair.network')
-local class = require('middleclass')
+local class = require('lib.middleclass')
 local uuid = require('lib.uuid')
 local socket = require('socket')
-local util = require('util')
+local util = require('common.util')
 
 local COMMANDS = require('common.commands')
 local Map = require('common.map')

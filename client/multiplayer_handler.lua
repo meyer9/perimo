@@ -6,17 +6,19 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Local Imports
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 local network = require 'lib.affair.network'
-local Entity = require 'entity'
+local Entity = require 'common.entity'
 local uuid = require 'lib.uuid'
-local util = require 'util'
-local COMMANDS = require('common.commands')
-local Gamestate = require('common.gamestate')
-local GamestateRunner = require('common.gamestate_runner')
-local messagepack = require('lib.msgpack.MessagePack')
-local MultiplayerEntities = require 'multiplayer_entities'
+local util = require 'common.util'
+local COMMANDS = require 'common.commands'
+local Gamestate = require 'common.gamestate'
+local GamestateRunner = require 'common.gamestate_runner'
+local messagepack = require 'lib.msgpack.MessagePack'
+local MultiplayerEntities = require 'client.multiplayer_entities'
 
 log = require 'common.log'
 

@@ -6,13 +6,15 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Third-party Imports
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 
 -- Local Imports
-local Entity = require 'entity'
-local Animation = require 'animation'
-local util = require 'util'
+local Entity = require 'common.entity'
+local Animation = require 'client.animation'
+local util = require 'common.util'
 
 local Player = class('Player', Entity)
 
@@ -31,8 +33,8 @@ end
 -- Sets up player graphics, fonts, and initial properties.
 -------------------------------------------------
 function Player:load()
-  self.torsoAnimation = Animation:new('player.png', 16, 16, 4, 0.3)
-  self.legAnimation = Animation:new('legs_anim.png', 16, 16, 9, 0.07)
+  self.torsoAnimation = Animation:new('resources/player.png', 16, 16, 4, 0.3)
+  self.legAnimation = Animation:new('resources/legs_anim.png', 16, 16, 9, 0.07)
 
   self.anim_index = 0
   self.x = 0

@@ -6,8 +6,10 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Third-party imports
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 
 local Entity = class('Entity')
 

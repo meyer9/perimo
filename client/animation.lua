@@ -7,7 +7,9 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
-local class = require 'middleclass'
+package.path = package.path .. ";../?.lua" -- include from top directory
+
+local class = require 'lib.middleclass'
 
 local Animation = class('Animation')
 

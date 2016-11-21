@@ -7,7 +7,7 @@
 -------------------------------------------------
 
 -- Local Imports
-local Game = require 'Game'
+local Game = require 'client.game'
 
 local main_game = Game:new()
 

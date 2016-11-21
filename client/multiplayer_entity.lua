@@ -6,9 +6,9 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
-local class = require 'middleclass'
-local Entity = require 'entity'
-local util = require 'util'
+local class = require 'lib.middleclass'
+local Entity = require 'common.entity'
+local util = require 'common.util'
 
 log = require 'common.log'
 

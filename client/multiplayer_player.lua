@@ -6,9 +6,11 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
-local class = require 'middleclass'
-local MultiplayerEntity = require 'multiplayer_entity'
-local Player = require 'player'
+package.path = package.path .. ";../?.lua" -- include from top directory
+
+local class = require 'lib.middleclass'
+local MultiplayerEntity = require 'client.multiplayer_entity'
+local Player = require 'client.player'
 local MultiplayerPlayer = class('MultiplayerPlayer', MultiplayerEntity)
 
 function MultiplayerPlayer:load()

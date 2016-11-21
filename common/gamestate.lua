@@ -9,9 +9,9 @@
 
 package.path = package.path .. ";../?.lua" -- include from top directory
 
-local class = require('middleclass')
+local class = require('lib.middleclass')
 local uuid = require('lib.uuid')
-local util = require('util')
+local util = require('common.util')
 local messagepack = require('lib.msgpack.MessagePack')
 local socket = require('socket')
 

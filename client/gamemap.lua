@@ -6,12 +6,14 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Third-party Imports
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 
 -- Local Imports
-local Entity = require 'entity'
-local Util = require 'util'
+local Entity = require 'common.entity'
+local Util = require 'common.util'
 local Map = require 'common.map'
 local Tiles = require 'common.tile_data'
 
@@ -23,7 +25,7 @@ local GameMap = class('GameMap', Map)
 -------------------------------------------------
 function GameMap:load()
   -- load spritesheet data
-  self.spritesheet = love.graphics.newImage("spritesheet.png")
+  self.spritesheet = love.graphics.newImage("resources/spritesheet.png")
   local spritesheet_width, spritesheet_height = self.spritesheet:getDimensions()
   Tiles.generate_tiles(spritesheet_width, spritesheet_height)
 

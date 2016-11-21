@@ -6,7 +6,7 @@ local socket = require("socket")
 local User = require( BASE .. "user" )
 local CMD = require( BASE .. "commands" )
 package.path = package.path .. ";../?.lua"
-local Util = require('util')
+local Util = require('common.util')
 log = require 'common.log'
 
 --local advertiseLAN = require( BASE_SLASH .. "serverlist/advertiseLAN" )

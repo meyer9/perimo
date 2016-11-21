@@ -10,12 +10,12 @@
 package.path = package.path .. ";../?.lua" -- include from top directory
 
 -- Third-party Imports
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 local perlin = require 'common.noise'
 
 -- Local Imports
-local Entity = require 'entity'
-local Util = require 'util'
+local Entity = require 'common.entity'
+local Util = require 'common.util'
 local Tiles = require 'common.tile_data'
 
 local Map = class('Map', Entity)

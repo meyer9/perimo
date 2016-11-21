@@ -6,14 +6,16 @@
 -- @copyright Julian Meyer 2016
 -------------------------------------------------
 
+package.path = package.path .. ";../?.lua" -- include from top directory
+
 -- Third-party Libraries
-local class = require 'middleclass'
+local class = require 'lib.middleclass'
 
 -- Local Imports
-local Entity = require 'entity'
-local GameMap = require 'gamemap'
-local Multiplayer = require 'multiplayer_handler'
-local Player = require 'player'
+local Entity = require 'common.entity'
+local GameMap = require 'client.gamemap'
+local Multiplayer = require 'client.multiplayer_handler'
+local Player = require 'client.player'
 local Camera = require 'lib.camera'
 
 
