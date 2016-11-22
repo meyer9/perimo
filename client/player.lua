@@ -14,6 +14,7 @@ local class = require 'lib.middleclass'
 -- Local Imports
 local Entity = require 'common.entity'
 local Animation = require 'client.animation'
+local Sword = require 'client.sword'
 local util = require 'common.util'
 
 local Player = class('Player', Entity)
@@ -35,6 +36,9 @@ end
 function Player:load()
   self.torsoAnimation = Animation:new('resources/player.png', 16, 16, 4, 0.3)
   self.legAnimation = Animation:new('resources/legs_anim.png', 16, 16, 9, 0.07)
+  self.sword = Sword:new(0.2, 64, 0.872) -- 50 degrees
+
+  self:addSubentity(self.sword)
 
   self.anim_index = 0
   self.x = 0

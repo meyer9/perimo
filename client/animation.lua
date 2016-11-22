@@ -17,7 +17,7 @@ local Animation = class('Animation')
 -- Constructor function of Animation class which
 -- also calculates quads using a spritesheet.
 --
--- @tparam tab spritesheet the spritesheet to use for the animation
+-- @tparam string spritesheet filename of the spritesheet to use for the animation
 -- @tparam int tileWidth width of each tile
 -- @tparam int tileHeight height of each tile
 -- @tparam int numTiles number of tiles horizontally contained in the animation

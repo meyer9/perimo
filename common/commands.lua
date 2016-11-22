@@ -17,6 +17,7 @@ COMMANDS = {
   delta_update = 18,
   full_update = 19,
   look = 20,
+  swing = 21,
   handshake = 255
 }
 
