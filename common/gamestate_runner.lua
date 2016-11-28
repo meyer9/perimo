@@ -14,6 +14,7 @@ local class = require 'lib.middleclass'
 local Gamestate = require 'common.gamestate'
 local COMMANDS = require 'common.commands'
 local Util = require 'common.util'
+local log = require 'common.log'
 
 local GamestateRunner = class('GamestateRunner')
 
@@ -61,6 +62,20 @@ function GamestateRunner.run_command_on_gamestate(new_gamestate, command_and_pla
   elseif cmd == COMMANDS.right then
     local currentX = new_gamestate:getObjectProp(player_uuid, "x")
     new_gamestate:updateState(player_uuid, "x", currentX + 100 / tickrate)
+  end
+  if cmd == COMMANDS.swing then
+    local currentX = new_gamestate:getObjectProp(player_uuid, "x")
+    local currentY = new_gamestate:getObjectProp(player_uuid, "y")
+    for uuid, entity in pairs(new_gamestate._state) do
+      if entity.type and entity.type == "player" and uuid ~= player_uuid then
+        local playerRadius = math.sqrt((currentX - entity.x) ^ 2 + (currentY - entity.y) ^ 2)
+        local playerAngle = math.atan2(entity.y - currentY, entity.x - currentX)
+        local playerRotation = tonumber(params)
+        if playerRadius < 64 and playerAngle < playerRotation + 0.872 and playerAngle > playerRotation - 0.872 then
+          log.debug("hit")
+        end
+      end
+    end
   end
   return new_gamestate
 end

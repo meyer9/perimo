@@ -143,7 +143,7 @@ function Server:handle_message(cmd, parms, user)
   if user.customData.player_uuid then
     command_and_player.player = user.customData.player_uuid
     command_and_player.cmd = cmd
-    command_and_player.parms = parms
+    command_and_player.params = parms
     GamestateRunner.run_command_on_gamestate(self.currentGamestate, command_and_player, self.server.tickrate, true)
   end
 end

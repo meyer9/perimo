@@ -56,13 +56,6 @@ end
 -------------------------------------------------
 function Entity:call_load()
   self:load()
-  if self.subentities then
-    for objectId, subentity in pairs(self.subentities) do
-      if subentity ~= nil then
-        subentity:call_load()
-      end
-    end
-  end
 end
 
 -------------------------------------------------
@@ -85,10 +78,22 @@ end
 -------------------------------------------------
 function Entity:call_draw()
   self:draw()
-  if self.subentities then
-    for objectId, subentity in pairs(self.subentities) do
-      if subentity ~= nil then
-        subentity:call_draw()
+  if self.lightworld then
+    self.lightworld:draw(function()
+      if self.subentities then
+        for objectId, subentity in pairs(self.subentities) do
+          if subentity ~= nil then
+            subentity:call_draw()
+          end
+        end
+      end
+    end)
+  else
+    if self.subentities then
+      for objectId, subentity in pairs(self.subentities) do
+        if subentity ~= nil then
+          subentity:call_draw()
+        end
       end
     end
   end

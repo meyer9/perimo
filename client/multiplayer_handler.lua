@@ -80,7 +80,7 @@ function Multiplayer:sendCommand(command, parms, udp)
   if not udp then udp = false end
   self.client:send(COMMANDS[command], parms, udp)
   local player_uuid = self.client:getUserValue("player_uuid")
-  self.gamestate_runner:addCommand(player_uuid, COMMANDS[command], self.tick, params)
+  self.gamestate_runner:addCommand(player_uuid, COMMANDS[command], self.tick, parms)
 end
 
 -------------------------------------------------
@@ -107,7 +107,7 @@ function Multiplayer:received(cmd, parms)
     self.currentGamestate:deserialize(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
     for entity_id, state in pairs(messagepack.unpack(parms)) do
-      if entity_id ~= player_uuid and entity_id ~= "server" then
+      if player_uuid and entity_id ~= player_uuid and entity_id ~= "server" then
         self.multiplayer_entities:addOrUpdate(entity_id, state)
       end
     end
@@ -119,7 +119,7 @@ function Multiplayer:received(cmd, parms)
     self.currentGamestate:deserializeDeltaAndUpdate(parms)
     local tick = self.currentGamestate:getObjectProp('server', 'tick')
     for entity_id, state in pairs(messagepack.unpack(parms)) do
-      if entity_id ~= player_uuid and entity_id ~= "server" then
+      if player_uuid and entity_id ~= player_uuid and entity_id ~= "server" then
         self.multiplayer_entities:addOrUpdate(entity_id, state)
       end
     end

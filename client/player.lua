@@ -33,12 +33,13 @@ end
 -------------------------------------------------
 -- Sets up player graphics, fonts, and initial properties.
 -------------------------------------------------
-function Player:load()
+function Player:load(multiplayer)
   self.torsoAnimation = Animation:new('resources/player.png', 16, 16, 4, 0.3)
   self.legAnimation = Animation:new('resources/legs_anim.png', 16, 16, 9, 0.07)
-  self.sword = Sword:new(0.2, 64, 0.872) -- 50 degrees
-
-  self:addSubentity(self.sword)
+  if not multiplayer then
+    self.sword = Sword:new(0.2, 64, 0.872) -- 50 degrees
+    self:addSubentity(self.sword)
+  end
 
   self.anim_index = 0
   self.x = 0
@@ -51,6 +52,10 @@ function Player:load()
   self.toReload = self.reload
   self.playerFont = love.graphics.newFont(10)
   self.rot = 0
+
+  self.flashlight = self.game.lightworld:newLight(self.x, self.y, 255, 255, 200, 1000)
+  self.flashlight:setAngle(math.pi / 2)
+  self.flashlight:setSmooth(2)
 end
 
 -------------------------------------------------
@@ -68,6 +73,8 @@ function Player:update(dt)
   end
   local mousePositionX, mousePositionY = self.game.camera:mousePosition()
   self.rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
+  self.flashlight:setDirection(self.rot)
+  self.flashlight:setPosition(self.x, self.y)
 end
 
 -------------------------------------------------
@@ -96,9 +103,7 @@ end
 -------------------------------------------------
 function Player:draw()
   -- draw torso
-
   local legRot = 0.2 * (math.pi + math.atan2(self.dy, self.dx)) + 0.8 * self.legSmooth
-
   love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 2, 2, 8, 8)
   love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, self.rot, 2, 2, 8, 8)
   love.graphics.setFont(self.playerFont)

@@ -33,6 +33,7 @@ function Sword:initialize(sword_duration, reach, angle)
   self.current_swing_angle = 0
   self.swinging = false
   self.end_swing_angle = 0
+  self.controllable = true
 end
 
 -------------------------------------------------
@@ -47,7 +48,7 @@ end
 -- @tparam number dt Amount of time in seconds passed since last update.
 -------------------------------------------------
 function Sword:update(dt)
-  if love.mouse.isDown(1) and self.swinging == false then
+  if love.mouse.isDown(1) and self.swinging == false and self.controllable then
     local angle = self.superentity.rot
     self.game.multiplayer:sendCommand("swing", angle)
     self.start_swing_angle = angle - self.angle / 2 + math.pi / 2

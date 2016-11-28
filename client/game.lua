@@ -17,6 +17,7 @@ local GameMap = require 'client.gamemap'
 local Multiplayer = require 'client.multiplayer_handler'
 local Player = require 'client.player'
 local Camera = require 'lib.camera'
+local LightWorld = require 'lib.lightworld'
 
 
 local Game = class('Game', Entity)
@@ -36,6 +37,12 @@ function Game:initialize()
   self:addSubentity(self.map)
 
   math.randomseed(os.clock())
+
+  self.lightworld = LightWorld({
+    ambient = {10,10,10},
+    refractionStrength = 32.0,
+    reflectionVisibility = 0.75,
+  })
 
   self.player = Player:new(true, "player" .. math.floor(math.random() * 100))
   self:addSubentity(self.player)
@@ -75,6 +82,8 @@ function Game:call_update(dt)
   else
     self.camera:lockY(self.player.y, smoother)
   end
+  self.lightworld:update(dt)
+  self.lightworld:setTranslation((love.graphics.getWidth() / 2) - self.camera.x * 2, (love.graphics.getHeight() / 2) - self.camera.y * 2, 2)
 end
 
 -------------------------------------------------
