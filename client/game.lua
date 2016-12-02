@@ -33,16 +33,16 @@ function Game:initialize()
 
   self.tickrate = 30
 
+  self.lightworld = LightWorld({
+    ambient = {50,50,50},
+    refractionStrength = 32.0,
+    reflectionVisibility = 0.75,
+  })
+
   self.map = GameMap:new()
   self:addSubentity(self.map)
 
   math.randomseed(os.clock())
-
-  self.lightworld = LightWorld({
-    ambient = {10,10,10},
-    refractionStrength = 32.0,
-    reflectionVisibility = 0.75,
-  })
 
   self.player = Player:new(true, "player" .. math.floor(math.random() * 100))
   self:addSubentity(self.player)

@@ -71,38 +71,47 @@ end
 -- Generates the map.
 -------------------------------------------------
 function Map:generate_island()
-  smoothness = 20
-  iterations = 4
-  local n, amplitude
-  local smoothnessx = smoothness * self.width / 30
-  local smoothnessy = smoothness * self.height / 30
+  self:set_tile(1, 1, Tiles.ID.TILE)
+  self:set_tile(2, 1, Tiles.ID.WALL_HORIZ)
+  self:set_tile(3, 1, Tiles.ID.WALL_HORIZ)
+  self:set_tile(4, 1, Tiles.ID.WALL_HORIZ)
+  self:set_tile(5, 1, Tiles.ID.WALL_HORIZ)
+  self:set_tile(1, 2, Tiles.ID.WALL_VERT)
+  self:set_tile(1, 3, Tiles.ID.WALL_VERT)
+  self:set_tile(1, 4, Tiles.ID.WALL_VERT)
+  self:set_tile(1, 5, Tiles.ID.WALL_VERT)
+  -- smoothness = 20
+  -- iterations = 4
+  -- local n, amplitude
+  -- local smoothnessx = smoothness * self.width / 30
+  -- local smoothnessy = smoothness * self.height / 30
 
-  local seed = math.random() * 50000
-  for y = 1, self.height do
-      for x = 1, self.width do -- This never repeats
-          n = 0
-          amplitude = 2
-          -- Generate the terrain
-          -- 'n' is the height value of the terrain
-          for i = 1, iterations do
-              n = n + (perlin.perlin(x/(smoothnessx)*amplitude,
-                                    y/(smoothnessy)*amplitude,
-                                    seed)+1) / amplitude
-              amplitude = amplitude * 2
-          end
-          -- Make the height value go to 0 near the edge
-          n = n * (1 - math.abs((x / self.width * 2) - 1))
-                * (1 - math.abs((y / self.height * 2) - 1))
-          bigness = 0.3
-          if n > bigness + 0.1 then
-            self:set_tile(x, y, Tiles.ID.GRASS)
-          elseif n > bigness then
-            self:set_tile(x, y, Tiles.ID.SAND)
-          else
-            self:set_tile(x, y, Tiles.ID.WATER)
-          end
-      end
-  end
+  -- local seed = math.random() * 50000
+  -- for y = 1, self.height do
+  --     for x = 1, self.width do -- This never repeats
+  --         n = 0
+  --         amplitude = 2
+  --         -- Generate the terrain
+  --         -- 'n' is the height value of the terrain
+  --         for i = 1, iterations do
+  --             n = n + (perlin.perlin(x/(smoothnessx)*amplitude,
+  --                                   y/(smoothnessy)*amplitude,
+  --                                   seed)+1) / amplitude
+  --             amplitude = amplitude * 2
+  --         end
+  --         -- Make the height value go to 0 near the edge
+  --         n = n * (1 - math.abs((x / self.width * 2) - 1))
+  --               * (1 - math.abs((y / self.height * 2) - 1))
+  --         bigness = 0.3
+  --         if n > bigness + 0.1 then
+  --           self:set_tile(x, y, Tiles.ID.GRASS)
+  --         elseif n > bigness then
+  --           self:set_tile(x, y, Tiles.ID.SAND)
+  --         else
+  --           self:set_tile(x, y, Tiles.ID.WATER)
+  --         end
+  --     end
+  -- end
 end
 
 -------------------------------------------------

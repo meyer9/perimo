@@ -14,11 +14,8 @@ local Tiles = {}
 Tiles.ID = {
   EMPTY = 0,
   TILE = 1,
-  TILE_CRACKED = 2,
-  BRICK = 3,
-  BRICK_CRACKED = 4,
-  WALL = 5,
-  WALL_LIGHT = 6
+  WALL_HORIZ = 2,
+  WALL_VERT = 3
 }
 
 Tiles.Data = {
@@ -31,7 +28,8 @@ Tiles.Data = {
     width = 32,
     height = 32,
     x = 0,
-    y = 0
+    y = 0,
+    normal = true
   },
   [2] = {
     width = 32,
@@ -41,97 +39,23 @@ Tiles.Data = {
     random = {
       [1] = {
         x = 64,
-        y = 0
-      },
-      [2] = {
-        x = 96,
-        y = 0
+        y = 0,
+        normal = true
       }
-    }
+    },
+    normal = true
   },
   [3] = {
     width = 32,
     height = 32,
-    x = 160,
-    y = 0
-  },
-  [4] = {
-    width = 32,
-    height = 32,
-    x = 192,
-    y = 0,
-  },
-  [5] = {
-    x = 52,
-    y = 51,
-    width = 14,
-    height = 20,
+    x = 0,
+    y = 32,
+    normal = true,
     random = {
       [1] = {
-        x = 64,
-        y = 51
-      },
-      [2] = {
-        x = 88,
-        y = 51
-      }
-    }
-  },
-  [6] = {
-    x = 128,
-    y = 128,
-    width = 32,
-    height = 32,
-    edges = {
-      [2] = {
-        t = {
-          x = 128,
-          y = 96
-        },
-        b = {
-          x = 128,
-          y = 160
-        },
-        l = {
-          x = 96,
-          y = 128
-        },
-        r = {
-          x = 160,
-          y = 128
-        },
-        tl = {
-          x = 96,
-          y = 96
-        },
-        bl = {
-          x = 96,
-          y = 160
-        },
-        tr = {
-          x = 160,
-          y = 96
-        },
-        br = {
-          x = 160,
-          y = 160
-        },
-        dbl = {
-          x = 192,
-          y = 128
-        },
-        dbr = {
-          x = 224,
-          y = 128
-        },
-        dtl = {
-          x = 192,
-          y = 96
-        },
-        dtr = {
-          x = 224,
-          y = 96
-        }
+        x = 0,
+        y = 64,
+        normal = true
       }
     }
   }

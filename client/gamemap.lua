@@ -26,6 +26,11 @@ local GameMap = class('GameMap', Map)
 function GameMap:load()
   -- load spritesheet data
   self.spritesheet = love.graphics.newImage("resources/spritesheet.png")
+  self.spritesheet_normal = love.graphics.newImage("resources/spritesheet_n.png")
+
+  local w, h = love.graphics.getWidth(), love.graphics.getHeight()
+  self.spritesheet_with_depth = self.game.lightworld:newImage(self.spritesheet, w / 2, h / 2)
+  self.spritesheet_with_depth:setNormalMap(self.spritesheet_normal)
   local spritesheet_width, spritesheet_height = self.spritesheet:getDimensions()
   Tiles.generate_tiles(spritesheet_width, spritesheet_height)
 
@@ -60,29 +65,29 @@ end
 -- @tparam int y Y-Coordinate to draw tile at
 -------------------------------------------------
 function GameMap:drawTile(tile_to_draw, x, y)
-  love.graphics.setColor(255 * ((x + y) % 2), 255 * ((x + y) % 2), 255 * ((x + y) % 2))
-  love.graphics.rectangle('fill', (x - 1) * 32, (y - 1) * 32, 32, 32)
-  love.graphics.setColor(255, 255, 255)
-  -- if tile_to_draw.random then
-  --   math.randomseed(x + 100 * y)
-  --   randNum = math.floor(math.random() * (1 + #tile_to_draw.random))
-  --   if randNum == 0 then
-  --     love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
-  --   else
-  --     love.graphics.draw(self.spritesheet, tile_to_draw.random[randNum].quad, (x - 1) * 32, (y - 1) * 32)
-  --   end
-  -- else
-  --   if tile_to_draw.animated then
-  --     local frameNum = math.ceil(self.currentTime / tile_to_draw.animated.time_between_frames) % (#tile_to_draw.animated.frames + 1)
-  --     if frameNum == 0 then
-  --       love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
-  --     else
-  --       love.graphics.draw(self.spritesheet, tile_to_draw.animated.frames[frameNum].quad, (x - 1) * 32, (y - 1) * 32)
-  --     end
-  --   else
-  --     love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
-  --   end
-  -- end
+  -- love.graphics.setColor(255 * ((x + y) % 2), 255 * ((x + y) % 2), 255 * ((x + y) % 2))
+  -- love.graphics.rectangle('fill', (x - 1) * 32, (y - 1) * 32, 32, 32)
+  -- love.graphics.setColor(255, 255, 255)
+  if tile_to_draw.random then
+    math.randomseed(x + 100 * y)
+    randNum = math.floor(math.random() * (1 + #tile_to_draw.random))
+    if randNum == 0 then
+      love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
+    else
+      love.graphics.draw(self.spritesheet, tile_to_draw.random[randNum].quad, (x - 1) * 32, (y - 1) * 32)
+    end
+  else
+    if tile_to_draw.animated then
+      local frameNum = math.ceil(self.currentTime / tile_to_draw.animated.time_between_frames) % (#tile_to_draw.animated.frames + 1)
+      if frameNum == 0 then
+        love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
+      else
+        love.graphics.draw(self.spritesheet, tile_to_draw.animated.frames[frameNum].quad, (x - 1) * 32, (y - 1) * 32)
+      end
+    else
+      love.graphics.draw(self.spritesheet, tile_to_draw.quad, (x - 1) * 32, (y - 1) * 32)
+    end
+  end
 end
 
 -------------------------------------------------
@@ -97,56 +102,55 @@ function GameMap:draw()
 
   for x = visible_tile_x, visible_tile_x + visible_tile_width do
     for y = visible_tile_y, visible_tile_y + visible_tile_height do
-      self:drawTile(nil, x, y)
-      -- tile_to_draw = Tiles.Data[self:get_tile(x, y)]
-      -- if tile_to_draw.should_draw ~= false then
-      --   adjCode = ""
-      --   if not tile_to_draw.edges then
-      --     self:drawTile(tile_to_draw, x, y)
-      --   else
-      --     edges = tile_to_draw.edges
-      --     adjCode = ""
-      --     tile = nil
-      --     if edges[self:get_tile(x, y - 1)] then
-      --       adjCode = adjCode .. 't'
-      --       tile = self:get_tile(x, y - 1)
-      --     end
-      --     if edges[self:get_tile(x, y + 1)] and (tile == nil or tile == self:get_tile(x, y + 1)) then
-      --       adjCode = adjCode .. 'b'
-      --       tile = self:get_tile(x, y + 1)
-      --     end
-      --     if edges[self:get_tile(x - 1, y)] and (tile == nil or tile == self:get_tile(x - 1, y)) then
-      --       adjCode = adjCode .. 'l'
-      --       tile = self:get_tile(x - 1, y)
-      --     end
-      --     if edges[self:get_tile(x + 1, y)] and (tile == nil or tile == self:get_tile(x + 1, y)) then
-      --       adjCode = adjCode .. 'r'
-      --       tile = self:get_tile(x + 1, y)
-      --     end
-      --     if edges[self:get_tile(x - 1, y - 1)] and #adjCode == 0 then
-      --       adjCode = 'dtl'
-      --       tile = self:get_tile(x - 1, y - 1)
-      --     end
-      --     if edges[self:get_tile(x + 1, y - 1)] and #adjCode == 0 then
-      --       adjCode = 'dtr'
-      --       tile = self:get_tile(x + 1, y - 1)
-      --     end
-      --     if edges[self:get_tile(x - 1, y + 1)] and #adjCode == 0 then
-      --       adjCode = 'dbl'
-      --       tile = self:get_tile(x - 1, y + 1)
-      --     end
-      --     if edges[self:get_tile(x + 1, y + 1)] and #adjCode == 0 then
-      --       adjCode = 'dbr'
-      --       tile = self:get_tile(x + 1, y + 1)
-      --     end
-      --     if tile and adjCode and tile_to_draw.edges[tile][adjCode] then
-      --       self:drawTile(Tiles.Data[tile], x, y)
-      --       self:drawTile(tile_to_draw.edges[tile][adjCode], x, y)
-      --     else
-      --       self:drawTile(tile_to_draw, x, y)
-      --     end
-      --   end
-      -- end
+      tile_to_draw = Tiles.Data[self:get_tile(x, y)]
+      if tile_to_draw.should_draw ~= false then
+        adjCode = ""
+        if not tile_to_draw.edges then
+          self:drawTile(tile_to_draw, x, y)
+        else
+          edges = tile_to_draw.edges
+          adjCode = ""
+          tile = nil
+          if edges[self:get_tile(x, y - 1)] then
+            adjCode = adjCode .. 't'
+            tile = self:get_tile(x, y - 1)
+          end
+          if edges[self:get_tile(x, y + 1)] and (tile == nil or tile == self:get_tile(x, y + 1)) then
+            adjCode = adjCode .. 'b'
+            tile = self:get_tile(x, y + 1)
+          end
+          if edges[self:get_tile(x - 1, y)] and (tile == nil or tile == self:get_tile(x - 1, y)) then
+            adjCode = adjCode .. 'l'
+            tile = self:get_tile(x - 1, y)
+          end
+          if edges[self:get_tile(x + 1, y)] and (tile == nil or tile == self:get_tile(x + 1, y)) then
+            adjCode = adjCode .. 'r'
+            tile = self:get_tile(x + 1, y)
+          end
+          if edges[self:get_tile(x - 1, y - 1)] and #adjCode == 0 then
+            adjCode = 'dtl'
+            tile = self:get_tile(x - 1, y - 1)
+          end
+          if edges[self:get_tile(x + 1, y - 1)] and #adjCode == 0 then
+            adjCode = 'dtr'
+            tile = self:get_tile(x + 1, y - 1)
+          end
+          if edges[self:get_tile(x - 1, y + 1)] and #adjCode == 0 then
+            adjCode = 'dbl'
+            tile = self:get_tile(x - 1, y + 1)
+          end
+          if edges[self:get_tile(x + 1, y + 1)] and #adjCode == 0 then
+            adjCode = 'dbr'
+            tile = self:get_tile(x + 1, y + 1)
+          end
+          if tile and adjCode and tile_to_draw.edges[tile][adjCode] then
+            self:drawTile(Tiles.Data[tile], x, y)
+            self:drawTile(tile_to_draw.edges[tile][adjCode], x, y)
+          else
+            self:drawTile(tile_to_draw, x, y)
+          end
+        end
+      end
     end
   end
   for x = visible_tile_x, visible_tile_x + visible_tile_width do
