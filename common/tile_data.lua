@@ -29,7 +29,8 @@ Tiles.Data = {
     height = 32,
     x = 0,
     y = 0,
-    normal = true
+    image_file = 'resources/tile_1.png',
+    normal = 'resources/tile_1_n.png'
   },
   [2] = {
     width = 32,
@@ -40,22 +41,26 @@ Tiles.Data = {
       [1] = {
         x = 64,
         y = 0,
-        normal = true
+        image_file = 'resources/tile_horiz_1.png',
+        normal = 'resources/tile_horiz_1_n.png'
       }
     },
-    normal = true
+    image_file = 'resources/tile_horiz_2.png',
+    normal = 'resources/tile_horiz_2_n.png'
   },
   [3] = {
     width = 32,
     height = 32,
     x = 0,
     y = 32,
-    normal = true,
+    image_file = 'resources/tile_vert_1.png',
+    normal = 'resources/tile_vert_1_n.png',
     random = {
       [1] = {
         x = 0,
         y = 64,
-        normal = true
+        normal = 'resources/tile_vert_2_n.png',
+        image_file = 'resources/tile_vert_2.png'
       }
     }
   }
@@ -73,6 +78,12 @@ function Tiles.generate_tiles(sw, sh)
   for i, tile in pairs(Tiles.Data) do
     if type(tile) ~= 'function' and tile.should_draw ~= false then
       Tiles.Data[i].quad = love.graphics.newQuad(tile.x, tile.y, tile.width, tile.height, sw, sh)
+      if Tiles.Data[i].image_file then
+        Tiles.Data[i].image = love.graphics.newImage(Tiles.Data[i].image_file)
+        if Tiles.Data[i].normal then
+          Tiles.Data[i].image_normal = love.graphics.newImage(Tiles.Data[i].normal)
+        end
+      end
       if tile.edges then
         for n, edge_tile in pairs(tile.edges) do
           for z, edge_tile_permutation in pairs(edge_tile) do
@@ -83,6 +94,12 @@ function Tiles.generate_tiles(sw, sh)
       if tile.random then
         for n, random_tile in pairs(tile.random) do
           Tiles.Data[i].random[n].quad = love.graphics.newQuad(random_tile.x, random_tile.y, tile.width, tile.height, sw, sh)
+            if Tiles.Data[i].image_file then
+              Tiles.Data[i].image = love.graphics.newImage(Tiles.Data[i].image_file)
+              if Tiles.Data[i].normal then
+                Tiles.Data[i].image_normal = love.graphics.newImage(Tiles.Data[i].normal)
+              end
+            end
         end
       end
       if tile.animated then

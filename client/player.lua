@@ -73,6 +73,7 @@ function Player:update(dt)
   end
   local mousePositionX, mousePositionY = self.game.camera:mousePosition()
   self.rot = math.atan2(self.y - mousePositionY, self.x - mousePositionX) + math.pi
+  local interpYaw = self.game.multiplayer.gamestate_runner:getFrameProp(playerUUID, 'yaw', self.game.multiplayer:getTick() + 1)
   self.flashlight:setDirection(self.rot)
   self.flashlight:setPosition(self.x, self.y)
 end
@@ -107,8 +108,10 @@ function Player:draw()
   love.graphics.draw(self.legAnimation.spritesheet, self.legAnimation:getCurrentQuad(), self.x, self.y, legRot, 2, 2, 8, 8)
   love.graphics.draw(self.torsoAnimation.spritesheet, self.torsoAnimation:getCurrentQuad(), self.x, self.y, self.rot, 2, 2, 8, 8)
   love.graphics.setFont(self.playerFont)
-  love.graphics.printf(self.name, self.x - 250, self.y + 16, 500, 'center')
-
+  love.graphics.push()
+    love.graphics.setColor(0, 0, 0, 255)
+    love.graphics.printf(self.name, self.x - 250, self.y + 16, 500, 'center')
+  love.graphics.pop()
 
   self.legSmooth = legRot
 end

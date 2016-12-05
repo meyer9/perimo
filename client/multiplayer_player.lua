@@ -11,6 +11,7 @@ package.path = package.path .. ";../?.lua" -- include from top directory
 local class = require 'lib.middleclass'
 local MultiplayerEntity = require 'client.multiplayer_entity'
 local Player = require 'client.player'
+local util = require 'common.util'
 local MultiplayerPlayer = class('MultiplayerPlayer', MultiplayerEntity)
 
 function MultiplayerPlayer:load()
@@ -26,6 +27,7 @@ end
 function MultiplayerEntity:updateState(state)
   if state.x then self.x = state.x end
   if state.y then self.y = state.y end
+  util.print_r(state)
   if state.yaw then self.rot = state.yaw end
   if state.name then self.name = state.name end
 end

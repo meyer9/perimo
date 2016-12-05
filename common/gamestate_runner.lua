@@ -42,6 +42,7 @@ end
 function GamestateRunner.run_command_on_gamestate(new_gamestate, command_and_player, tickrate, skip_tick)
   local cmd = command_and_player.cmd
   local player_uuid = command_and_player.player
+  if not player_uuid then return end
   local params = command_and_player.params
   if not skip_tick then
     local tick = command_and_player.tick
@@ -76,6 +77,9 @@ function GamestateRunner.run_command_on_gamestate(new_gamestate, command_and_pla
         end
       end
     end
+  end
+  if cmd == COMMANDS.look then
+    new_gamestate:updateState(player_uuid, "yaw", tonumber(params))
   end
   return new_gamestate
 end
